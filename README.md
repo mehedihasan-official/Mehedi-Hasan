@@ -1,53 +1,51 @@
 # Mehedi Hasan — Personal Brand + Client Management Platform
 
-One platform, three surfaces:
+Two projects in one repo:
 
-- **Public site** — portfolio, services, case studies, "start a project" flow
-- **Client dashboard** — projects, stages, files, invoices, WhatsApp + in-app messages
-- **Admin CMS** — client, project, lead, invoice, portfolio management (Mehedi only)
+- **[mehedi-client/](mehedi-client)** — the Next.js 15 frontend (public site + client dashboard + admin CMS)
+- **[mehedi-server/](mehedi-server)** — the Express + MongoDB backend API
 
-## Monorepo
-
-```
-Mehedi-Hasan/
-├── apps/
-│   ├── mehedi-client/     Next.js 15 (public + client + admin, gated by role)
-│   └── mehedi-server/     Express + TypeScript + Mongoose + Socket.io
-└── packages/
-    └── shared/            Zod schemas, TS types, enums shared by web + server
-```
+Each project is fully standalone with its own `package.json` and `npm run dev` command.
 
 ## Local development
 
+Open two terminals — one for each project.
+
+### 1. Start the server (backend)
+
 ```bash
-pnpm install
-cp .env.example .env
-# fill in .env values
-pnpm dev
+cd mehedi-server
+cp .env.example .env    # fill in MONGODB_URI, JWT_SECRET, ADMIN_PASSWORD, etc.
+npm install
+npm run seed            # creates the admin + real clients in MongoDB (first time only)
+npm run dev             # runs at http://localhost:4000
 ```
 
-- Web: <http://localhost:3000>
-- API: <http://localhost:4000>
+### 2. Start the client (frontend)
 
-## Scripts
+```bash
+cd mehedi-client
+cp .env.example .env.local   # fill in NEXTAUTH_SECRET (must match server JWT_SECRET), etc.
+npm install
+npm run dev                  # runs at http://localhost:3000
+```
 
-| Command             | What it does                                |
-| ------------------- | ------------------------------------------- |
-| `pnpm dev`          | Run web + api together                      |
-| `pnpm dev:web`      | Run Next.js only                            |
-| `pnpm dev:api`      | Run Express only                            |
-| `pnpm build`        | Build everything                            |
-| `pnpm lint`         | Lint everything                             |
-| `pnpm typecheck`    | Typecheck everything                        |
-| `pnpm seed`         | Seed MongoDB with admin user + real clients |
+Then open <http://localhost:3000/login> and sign in as the admin email you set (default `skmehedihasan.jr1@gmail.com`) with the `ADMIN_PASSWORD` you chose.
 
-## Stack
+## Shared code
 
-Next.js 15 · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn/ui · Framer Motion · NextAuth v5 · Express · Mongoose · MongoDB Atlas · Cloudinary · Resend · Calendly · TanStack Query · Socket.io · Recharts
+Both projects have their own `src/shared/` folder with matching Zod schemas and TypeScript types. **Keep them in sync** — when you change a schema in one project, copy the change to the other. The files are identical.
 
 ## Deployment
 
-- **Web** → Vercel (auto-deploy from `main`)
-- **API** → Railway
-- **DB** → MongoDB Atlas
+- **mehedi-client** → Vercel (root directory = `mehedi-client`)
+- **mehedi-server** → Railway (root directory = `mehedi-server`)
+- **Database** → MongoDB Atlas
 - **Files** → Cloudinary
+- **Email** → Resend
+
+Push to `main` and Vercel auto-deploys the client.
+
+## Stack
+
+Next.js 15 · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style UI · Framer Motion · NextAuth v5 · Express · Mongoose · MongoDB · Cloudinary · Resend · Calendly · TanStack Query · Socket.io · Recharts
