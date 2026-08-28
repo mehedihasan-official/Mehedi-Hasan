@@ -1,0 +1,29 @@
+{
+  "name": "mehedi-hasan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mehedi Hasan — personal brand + client management platform",
+  "author": "Mehedi Hasan <skmehedihasan.jr1@gmail.com>",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=mehedi-client",
+    "dev:api": "turbo run dev --filter=mehedi-server",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean",
+    "seed": "pnpm --filter mehedi-server seed",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.3"
+  }
+}
