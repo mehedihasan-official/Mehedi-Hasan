@@ -14,10 +14,12 @@ const errorCopy: Record<string, string> = {
     "That Google account isn't linked to a client yet. Reach out on WhatsApp and I'll invite you.",
   NoEmail: "Couldn't read your email from Google. Try again or use email + password.",
   Configuration:
-    'Auth isn\'t configured yet — NEXTAUTH_SECRET (and Google credentials if using Google) must be set in .env.local.',
+    "Auth isn't configured yet — NEXTAUTH_SECRET (and Google credentials if using Google) must be set in the environment.",
+  OAuthSignin: 'Google login is temporarily unavailable. Please use email + password.',
+  OAuthCallback: 'Google login failed. Please try again or use email + password.',
 };
 
-export function LoginForm({ hasGoogle }: { hasGoogle: boolean }) {
+export function LoginForm({ googleConfigured }: { googleConfigured: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get('callbackUrl') ?? '/dashboard';
@@ -36,11 +38,22 @@ export function LoginForm({ hasGoogle }: { hasGoogle: boolean }) {
       toast.error('Invalid email or password');
       return;
     }
-    const dest = callbackUrl.startsWith('/admin') || callbackUrl.startsWith('/dashboard')
-      ? callbackUrl
-      : '/dashboard';
+    const dest =
+      callbackUrl.startsWith('/admin') || callbackUrl.startsWith('/dashboard')
+        ? callbackUrl
+        : '/dashboard';
     router.push(dest);
     router.refresh();
+  }
+
+  function handleGoogle() {
+    if (!googleConfigured) {
+      toast.info(
+        "Google login isn't set up on this deployment yet. Use email + password for now.",
+      );
+      return;
+    }
+    signIn('google', { callbackUrl });
   }
 
   return (
@@ -51,36 +64,40 @@ export function LoginForm({ hasGoogle }: { hasGoogle: boolean }) {
         </div>
       ) : null}
 
-      {hasGoogle ? (
-        <>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            size="lg"
-            onClick={() => signIn('google', { callbackUrl })}
-          >
-            <GoogleIcon className="h-4 w-4" /> Continue with Google
-          </Button>
+      <Button type="button" variant="outline" className="w-full" size="lg" onClick={handleGoogle}>
+        <GoogleIcon className="h-4 w-4" /> Continue with Google
+      </Button>
 
-          <div className="relative flex items-center gap-3 text-xs text-subtle">
-            <span className="h-px flex-1 bg-app" />
-            <span>or use email</span>
-            <span className="h-px flex-1 bg-app" />
-          </div>
-        </>
-      ) : null}
+      <div className="relative flex items-center gap-3 text-xs text-subtle">
+        <span className="h-px flex-1 bg-app" />
+        <span>or use email</span>
+        <span className="h-px flex-1 bg-app" />
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label>Email</Label>
-          <Input type="email" placeholder="you@example.com" autoComplete="email" {...register('email')} />
+          <Label htmlFor="login-email">Email</Label>
+          <Input
+            id="login-email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            {...register('email')}
+          />
           {errors.email ? <p className="text-xs text-red-400">{errors.email.message}</p> : null}
         </div>
         <div className="space-y-2">
-          <Label>Password</Label>
-          <Input type="password" placeholder="••••••••" autoComplete="current-password" {...register('password')} />
-          {errors.password ? <p className="text-xs text-red-400">{errors.password.message}</p> : null}
+          <Label htmlFor="login-password">Password</Label>
+          <Input
+            id="login-password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            {...register('password')}
+          />
+          {errors.password ? (
+            <p className="text-xs text-red-400">{errors.password.message}</p>
+          ) : null}
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
