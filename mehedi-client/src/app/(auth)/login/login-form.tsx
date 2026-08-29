@@ -13,9 +13,11 @@ const errorCopy: Record<string, string> = {
   NotInvited:
     "That Google account isn't linked to a client yet. Reach out on WhatsApp and I'll invite you.",
   NoEmail: "Couldn't read your email from Google. Try again or use email + password.",
+  Configuration:
+    'Auth isn\'t configured yet — NEXTAUTH_SECRET (and Google credentials if using Google) must be set in .env.local.',
 };
 
-export function LoginForm() {
+export function LoginForm({ hasGoogle }: { hasGoogle: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get('callbackUrl') ?? '/dashboard';
@@ -49,21 +51,25 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        size="lg"
-        onClick={() => signIn('google', { callbackUrl })}
-      >
-        <GoogleIcon className="h-4 w-4" /> Continue with Google
-      </Button>
+      {hasGoogle ? (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => signIn('google', { callbackUrl })}
+          >
+            <GoogleIcon className="h-4 w-4" /> Continue with Google
+          </Button>
 
-      <div className="relative flex items-center gap-3 text-xs text-subtle">
-        <span className="h-px flex-1 bg-app" />
-        <span>or use email</span>
-        <span className="h-px flex-1 bg-app" />
-      </div>
+          <div className="relative flex items-center gap-3 text-xs text-subtle">
+            <span className="h-px flex-1 bg-app" />
+            <span>or use email</span>
+            <span className="h-px flex-1 bg-app" />
+          </div>
+        </>
+      ) : null}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">

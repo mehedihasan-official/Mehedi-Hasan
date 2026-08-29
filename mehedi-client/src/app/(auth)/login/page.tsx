@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { LoginForm } from './login-form';
 
 export default function LoginPage() {
+  const hasGoogle = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
   return (
     <div className="rounded-2xl border border-app bg-card p-8 shadow-card">
       <Link href="/" className="mb-6 flex items-center gap-2 text-sm text-muted hover:text-body">
@@ -12,7 +14,7 @@ export default function LoginPage() {
       <p className="mt-1 text-sm text-muted">Log in to your dashboard.</p>
 
       <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-lg bg-elev" />}>
-        <LoginForm />
+        <LoginForm hasGoogle={hasGoogle} />
       </Suspense>
 
       <p className="mt-6 text-center text-xs text-subtle">
