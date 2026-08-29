@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "buildCommand": "echo 'no build step — @vercel/node compiles api/ directly'",
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
 }
