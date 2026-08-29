@@ -54,21 +54,39 @@ const clients: SeedClient[] = [
 async function main(): Promise<void> {
   await connectDatabase();
 
-  const existingAdmin = await UserModel.findOne({ role: 'admin', 'emails.address': env.ADMIN_EMAIL.toLowerCase() });
+  const existingAdmin = await UserModel.findOne({
+    role: 'admin',
+    'emails.address': env.ADMIN_EMAIL.toLowerCase(),
+  });
+  const secondaryEmail = 'mehedihasanshopnil.jr@gmail.com';
   if (!existingAdmin) {
     const passwordHash = await bcrypt.hash(env.ADMIN_PASSWORD, 12);
     await UserModel.create({
       role: 'admin',
       name: env.ADMIN_NAME,
-      emails: [{ address: env.ADMIN_EMAIL, primary: true, label: 'Primary' }],
+      emails: [
+        { address: env.ADMIN_EMAIL, primary: true, label: 'Primary' },
+        { address: secondaryEmail, primary: false, label: 'Secondary' },
+      ],
       passwordHash,
       country: 'Bangladesh',
       timezone: 'Asia/Dhaka',
+      whatsapp: '+8801316265634',
       active: true,
     });
-    logger.info(`Seeded admin ${env.ADMIN_EMAIL}`);
+    logger.info(`Seeded admin ${env.ADMIN_EMAIL} (+ secondary ${secondaryEmail})`);
   } else {
-    logger.info('Admin already exists — skipping');
+    // Make sure the secondary email is on the account even if admin already exists
+    const hasSecondary = existingAdmin.emails.some(
+      (e) => e.address.toLowerCase() === secondaryEmail.toLowerCase(),
+    );
+    if (!hasSecondary) {
+      existingAdmin.emails.push({ address: secondaryEmail, primary: false, label: 'Secondary' });
+      await existingAdmin.save();
+      logger.info(`Added secondary email ${secondaryEmail} to admin`);
+    } else {
+      logger.info('Admin already exists — skipping');
+    }
   }
 
   for (const c of clients) {

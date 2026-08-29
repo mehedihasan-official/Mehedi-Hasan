@@ -16,10 +16,13 @@ declare module 'next-auth' {
   }
 }
 
+const hasGoogle = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
 export const authConfig: NextAuthConfig = {
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
   providers: [
     Credentials({
@@ -52,16 +55,49 @@ export const authConfig: NextAuthConfig = {
         }
       },
     }),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ...(hasGoogle
       ? [
           Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
           }),
         ]
       : []),
   ],
   callbacks: {
+    // Google flow: verify the returned Google email matches an invited user in
+    // our database before letting the sign-in complete. Random Gmails bounce
+    // back to /login with an error.
+    async signIn({ account, profile, user }) {
+      if (account?.provider !== 'google') return true;
+      const email = (profile?.email ?? user.email ?? '').toLowerCase();
+      if (!email) return '/login?error=NoEmail';
+      try {
+        const { token, user: sessionUser } = await apiFetch<{
+          token: string;
+          user: SessionUser;
+        }>('/auth/google-callback', {
+          method: 'POST',
+          body: JSON.stringify({
+            email,
+            name: profile?.name ?? user.name ?? undefined,
+            image: (profile as { picture?: string } | undefined)?.picture ?? user.image ?? undefined,
+          }),
+          server: true,
+        });
+        // Hydrate the user object so the jwt callback below can pick it up
+        user.id = sessionUser.id;
+        user.name = sessionUser.name;
+        user.email = sessionUser.email;
+        user.image = sessionUser.avatar ?? undefined;
+        (user as typeof user & { role: SessionUser['role']; apiToken: string }).role =
+          sessionUser.role;
+        (user as typeof user & { role: SessionUser['role']; apiToken: string }).apiToken = token;
+        return true;
+      } catch {
+        return '/login?error=NotInvited';
+      }
+    },
     async jwt({ token, user }) {
       if (user) {
         token.userId = (user.id ?? token.sub) as string;
