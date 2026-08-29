@@ -26,3 +26,22 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   }
   return (await res.json()) as T;
 }
+
+// Server-only helper: never throws. Returns a fallback when the API is
+// unreachable so a page render on Vercel doesn't crash when the backend
+// isn't ready yet (fresh deploy, cold start, etc.).
+export async function apiFetchSafe<T>(
+  path: string,
+  fallback: T,
+  options: FetchOptions = {},
+): Promise<{ data: T; error: string | null }> {
+  try {
+    const data = await apiFetch<T>(path, options);
+    return { data, error: null };
+  } catch (err) {
+    return {
+      data: fallback,
+      error: err instanceof Error ? err.message : 'Request failed',
+    };
+  }
+}

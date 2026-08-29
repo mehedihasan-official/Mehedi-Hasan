@@ -1,19 +1,21 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiFetch } from '@/lib/api';
+import { apiFetchSafe } from '@/lib/api';
 import type { Client } from '@/shared';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ClientsGrid } from './clients-grid';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminClientsPage() {
   const session = await auth();
-  const { clients } = await apiFetch<{ clients: Client[] }>('/clients', {
-    server: true,
-    token: session?.apiToken,
-  });
+  const { data, error } = await apiFetchSafe<{ clients: Client[] }>(
+    '/clients',
+    { clients: [] },
+    { server: true, token: session?.apiToken },
+  );
 
   return (
     <div className="space-y-8">
@@ -21,7 +23,7 @@ export default async function AdminClientsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
           <p className="mt-2 text-muted">
-            {clients.length} {clients.length === 1 ? 'client' : 'clients'} — your book of business.
+            {data.clients.length} {data.clients.length === 1 ? 'client' : 'clients'} — your book of business.
           </p>
         </div>
         <Button asChild>
@@ -31,7 +33,15 @@ export default async function AdminClientsPage() {
         </Button>
       </div>
 
-      <ClientsGrid initial={clients} />
+      {error ? (
+        <EmptyState
+          tone="warning"
+          title="Can't reach the API"
+          description={`${error}. Check that the mehedi-server deployment is live and NEXT_PUBLIC_API_URL is set.`}
+        />
+      ) : (
+        <ClientsGrid initial={data.clients} />
+      )}
     </div>
   );
 }

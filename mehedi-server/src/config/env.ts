@@ -6,6 +6,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 chars'),
+  // Comma-separated list. Use "*" to allow any origin (only in early dev).
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
 
   RESEND_API_KEY: z.string().optional(),
@@ -20,8 +21,14 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {
   console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
-  process.exit(1);
+  throw new Error('Invalid environment');
 }
 
 export const env = parsed.data;
-export const corsOrigins = env.CORS_ORIGINS.split(',').map((s) => s.trim());
+
+const rawOrigins = env.CORS_ORIGINS.split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+export const corsOrigins = rawOrigins;
+export const allowAllOrigins = rawOrigins.includes('*');

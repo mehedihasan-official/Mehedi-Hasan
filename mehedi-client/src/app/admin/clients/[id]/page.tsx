@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Mail, Phone, MapPin, Clock, MessageCircle, ArrowLeft, Copy } from 'lucide-react';
 import { auth } from '@/auth';
-import { apiFetch } from '@/lib/api';
+import { apiFetchSafe } from '@/lib/api';
 import type { Client } from '@/shared';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { formatCurrency, formatDate, whatsappLink } from '@/lib/utils';
 import { ClientEditForm } from './client-edit-form';
 
@@ -16,24 +17,27 @@ export const dynamic = 'force-dynamic';
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  let data: { client: Client };
-  try {
-    data = await apiFetch<{ client: Client }>(`/clients/${id}`, {
-      server: true,
-      token: session?.apiToken,
-    });
-  } catch {
-    notFound();
+  const { data, error } = await apiFetchSafe<{ client: Client | null }>(
+    `/clients/${id}`,
+    { client: null },
+    { server: true, token: session?.apiToken },
+  );
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <BackLink />
+        <EmptyState tone="warning" title="Can't reach the API" description={error} />
+      </div>
+    );
   }
+
+  if (!data.client) notFound();
   const c = data.client;
 
   return (
     <div className="space-y-8">
-      <div>
-        <Link href="/admin/clients" className="inline-flex items-center gap-2 text-sm text-muted hover:text-body">
-          <ArrowLeft className="h-4 w-4" /> All clients
-        </Link>
-      </div>
+      <BackLink />
 
       <header className="flex flex-wrap items-start justify-between gap-6">
         <div className="flex items-start gap-4">
@@ -138,6 +142,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
     </div>
+  );
+}
+
+function BackLink() {
+  return (
+    <Link href="/admin/clients" className="inline-flex items-center gap-2 text-sm text-muted hover:text-body">
+      <ArrowLeft className="h-4 w-4" /> All clients
+    </Link>
   );
 }
 

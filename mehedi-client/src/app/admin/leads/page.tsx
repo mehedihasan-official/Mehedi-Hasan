@@ -1,7 +1,8 @@
 import { auth } from '@/auth';
-import { apiFetch } from '@/lib/api';
+import { apiFetchSafe } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { formatDate } from '@/lib/utils';
 import type { Lead } from '@/shared';
 
@@ -9,10 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function LeadsPage() {
   const session = await auth();
-  const { leads } = await apiFetch<{ leads: Lead[] }>('/leads', {
-    server: true,
-    token: session?.apiToken,
-  });
+  const { data, error } = await apiFetchSafe<{ leads: Lead[] }>(
+    '/leads',
+    { leads: [] },
+    { server: true, token: session?.apiToken },
+  );
 
   return (
     <div className="space-y-6">
@@ -21,13 +23,13 @@ export default async function LeadsPage() {
         <p className="mt-2 text-muted">Inbox from the public Start a Project form.</p>
       </div>
 
-      {leads.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-app bg-card p-12 text-center text-muted">
-          No leads yet.
-        </div>
+      {error ? (
+        <EmptyState tone="warning" title="Can't reach the API" description={error} />
+      ) : data.leads.length === 0 ? (
+        <EmptyState title="No leads yet" description="They'll show up here as soon as someone submits the Start a Project form." />
       ) : (
         <div className="grid gap-4">
-          {leads.map((l) => (
+          {data.leads.map((l) => (
             <Card key={l.id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">

@@ -38,13 +38,16 @@ Both projects have their own `src/shared/` folder with matching Zod schemas and 
 
 ## Deployment
 
-- **mehedi-client** → Vercel (root directory = `mehedi-client`)
-- **mehedi-server** → Railway (root directory = `mehedi-server`)
-- **Database** → MongoDB Atlas
-- **Files** → Cloudinary
-- **Email** → Resend
+Both projects deploy to **Vercel** as two separate projects from this one GitHub repo.
 
-Push to `main` and Vercel auto-deploys the client.
+See **[DEPLOY.md](DEPLOY.md)** for the full step-by-step (env vars, root directory settings, CORS wiring, common errors).
+
+Quick version:
+1. Import the repo into Vercel, set root directory to `mehedi-server`, add env vars, deploy.
+2. Import the repo again into a second Vercel project, set root directory to `mehedi-client`, add env vars (including the server URL), deploy.
+3. Go back to the server project, set `CORS_ORIGINS` to the client URL, redeploy.
+
+Push to `main` and both projects auto-redeploy.
 
 ## Stack
 
