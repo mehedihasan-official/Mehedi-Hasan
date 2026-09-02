@@ -1,10 +1,35 @@
 import Link from 'next/link';
+import { getSession } from '@/lib/session';
+import { apiFetchSafe } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDate } from '@/lib/utils';
+import type { Brief } from '@/shared';
 
-export default function AdminOverviewPage() {
+export const dynamic = 'force-dynamic';
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+export default async function AdminOverviewPage() {
+  const session = await getSession();
+  const token = session?.apiToken;
+
+  const [activeProjects, briefs] = await Promise.all([
+    apiFetchSafe<{ total: number }>(
+      '/orders?status=accepted,in_progress&limit=1',
+      { total: 0 },
+      { server: true, token },
+    ),
+    apiFetchSafe<{ briefs: Brief[] }>('/briefs', { briefs: [] }, { server: true, token }),
+  ]);
+
+  const newBriefs7d = briefs.data.briefs.filter(
+    (b) => Date.now() - new Date(b.createdAt).getTime() < SEVEN_DAYS_MS,
+  ).length;
+  const recentBriefs = briefs.data.briefs.slice(0, 5);
+
   const kpis = [
-    { label: 'Active projects', value: '—' },
-    { label: 'New briefs (7d)', value: '—' },
+    { label: 'Active projects', value: String(activeProjects.data.total) },
+    { label: 'New briefs (7d)', value: String(newBriefs7d) },
     { label: 'Unread messages', value: '—' },
     { label: 'MRR (this month)', value: '—' },
   ];
@@ -43,9 +68,25 @@ export default function AdminOverviewPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardDescription>Coming soon.</CardDescription>
+            <CardTitle>Recent briefs</CardTitle>
+            <CardDescription>Latest submissions from Start a Project.</CardDescription>
           </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {recentBriefs.length === 0 ? (
+              <p className="text-muted">Nothing yet.</p>
+            ) : (
+              recentBriefs.map((b) => (
+                <Link
+                  key={b.id}
+                  href="/admin/briefs"
+                  className="flex items-center justify-between rounded-lg border border-app bg-elev px-3 py-2 hover:border-strong"
+                >
+                  <span className="truncate text-body">{b.name}</span>
+                  <span className="shrink-0 text-xs text-subtle">{formatDate(b.createdAt)}</span>
+                </Link>
+              ))
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>
