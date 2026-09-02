@@ -4,6 +4,7 @@ import helmetPkg from 'helmet';
 import rateLimitPkg from 'express-rate-limit';
 import { pinoHttp } from 'pino-http';
 import { allowAllOrigins, corsOrigins } from './config/env.js';
+import { connectDatabase } from './config/db.js';
 import { logger } from './config/logger.js';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
@@ -53,6 +54,16 @@ export function createApp(): Express {
   const publicLimiter = rateLimit({ windowMs: 60 * 1000, max: 30 });
   const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
 
+  // Ensures the DB is connected (or the connection attempt has failed fast)
+  // before any route runs — matters on serverless, where a cold function
+  // hasn't necessarily connected yet. connectDatabase() caches its promise,
+  // so this is a no-op on warm invocations.
+  app.use((_req, res, next) => {
+    connectDatabase()
+      .then(() => next())
+      .catch(() => res.status(503).json({ error: 'Database unavailable' }));
+  });
+
   app.get('/', (_req, res) => res.json({ ok: true, service: 'mehedi-server' }));
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
@@ -67,3 +78,8 @@ export function createApp(): Express {
 
   return app;
 }
+
+// Vercel's "Express" framework preset auto-detects this file as the app
+// entry and expects a default export that's a real Express app (not just
+// the factory above) — see api/index.ts for why both exist.
+export default createApp();
