@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, FolderKanban, Inbox, Package, Receipt, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, FolderKanban, Inbox, Package, Receipt, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,11 @@ import { SignOutButton } from '@/components/auth/sign-out-button';
 
 const nav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
+  { href: '/admin/briefs', label: 'Briefs', icon: Inbox },
+  { href: '/admin/users', label: 'Users', icon: UserCircle },
   { href: '/admin/clients', label: 'Clients', icon: Users },
   { href: '/admin/orders', label: 'Orders', icon: Package },
   { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/admin/leads', label: 'Leads', icon: Inbox },
   { href: '/admin/invoices', label: 'Invoices', icon: Receipt },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];

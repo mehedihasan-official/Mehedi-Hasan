@@ -1,47 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { leadCreateSchema, type LeadCreateInput } from '@/shared';
+import { briefCreateSchema, type BriefCreateInput } from '@/shared';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api';
+import { useSession } from '@/hooks/use-session';
 
 export default function StartProjectPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
+  const { data: session } = useSession();
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<LeadCreateInput>({
-    resolver: zodResolver(leadCreateSchema),
+  } = useForm<BriefCreateInput>({
+    resolver: zodResolver(briefCreateSchema),
     defaultValues: { source: 'contact_form', serviceType: 'web_app', budgetRange: 'not_sure', timeline: 'flexible' },
   });
 
-  async function onSubmit(values: LeadCreateInput) {
+  async function onSubmit(values: BriefCreateInput) {
     try {
-      await apiFetch('/leads', { method: 'POST', body: JSON.stringify(values) });
-      toast.success('Got it — I&apos;ll reach out within a day.');
-      setSubmitted(true);
-      reset();
+      await apiFetch('/briefs', {
+        method: 'POST',
+        body: JSON.stringify(values),
+        token: session?.apiToken ?? null,
+      });
+      toast.success("Got it — I'll reach out within a day.", {
+        description: session ? 'You can track it from your dashboard.' : undefined,
+        duration: 4000,
+      });
+      setTimeout(() => router.push(session ? '/dashboard/briefs' : '/'), 1200);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong');
     }
-  }
-
-  if (submitted) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-24 md:px-6 text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full gradient-brand text-white text-3xl font-bold">✓</div>
-        <h1 className="mt-8 text-3xl font-bold tracking-tight">Thanks — got your brief.</h1>
-        <p className="mt-4 text-muted">
-          I&apos;ll read it today and reach out on email or WhatsApp within 24 hours. Talk soon.
-        </p>
-      </div>
-    );
   }
 
   return (

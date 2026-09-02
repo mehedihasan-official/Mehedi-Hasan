@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function AdminOverviewPage() {
   const kpis = [
     { label: 'Active projects', value: '—' },
-    { label: 'New leads (7d)', value: '—' },
+    { label: 'New briefs (7d)', value: '—' },
     { label: 'Unread messages', value: '—' },
     { label: 'MRR (this month)', value: '—' },
   ];
@@ -34,10 +34,11 @@ export default function AdminOverviewPage() {
             <CardDescription>Jump straight to what you use most.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2 text-sm">
+            <QuickLink href="/admin/briefs" title="Briefs inbox" desc="Start orders from finalized briefs" />
+            <QuickLink href="/admin/users" title="Users" desc="Registered people who aren't clients yet" />
             <QuickLink href="/admin/clients" title="Clients" desc="Card grid + profile pages" />
             <QuickLink href="/admin/orders" title="Orders" desc="Self-service orders + tracking codes" />
-            <QuickLink href="/admin/leads" title="Leads inbox" desc="Convert leads into clients" />
-            <QuickLink href="/admin/projects" title="Projects" desc="Kanban + stage timelines" />
+            <QuickLink href="/admin/projects" title="Projects" desc="Running + completed client projects" />
           </CardContent>
         </Card>
         <Card>
