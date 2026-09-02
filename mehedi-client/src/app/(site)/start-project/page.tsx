@@ -3,12 +3,19 @@
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { briefCreateSchema, type BriefCreateInput } from '@/shared';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { briefCreateSchema, type Brief, type BriefCreateInput } from '@/shared';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api';
+import { auth } from '@/lib/firebase';
+import { exchangeFirebaseSession } from '@/lib/auth-exchange';
 import { useSession } from '@/hooks/use-session';
+
+// Matches the temp password the server hands new accounts auto-created
+// from a brief submission — see mehedi-server/src/routes/briefs.ts.
+const TEMP_PASSWORD = '123456';
 
 export default function StartProjectPage() {
   const router = useRouter();
@@ -24,16 +31,38 @@ export default function StartProjectPage() {
 
   async function onSubmit(values: BriefCreateInput) {
     try {
-      await apiFetch('/briefs', {
-        method: 'POST',
-        body: JSON.stringify(values),
-        token: session?.apiToken ?? null,
-      });
+      const res = await apiFetch<{ brief: Brief; accountStatus: 'linked' | 'created' | 'existing' }>(
+        '/briefs',
+        { method: 'POST', body: JSON.stringify(values), token: session?.apiToken ?? null },
+      );
+
+      if (res.accountStatus === 'created') {
+        // Brand new account — sign them in with the temp password and send
+        // them straight to set a real one.
+        const cred = await signInWithEmailAndPassword(auth, values.email, TEMP_PASSWORD);
+        await exchangeFirebaseSession(cred.user, values.name);
+        toast.success("Got it — I'll reach out within a day.", {
+          description: 'Your dashboard is ready — please set a password to secure it.',
+          duration: 5000,
+        });
+        setTimeout(() => router.push('/dashboard/profile?welcome=1'), 1200);
+        return;
+      }
+
+      if (res.accountStatus === 'existing') {
+        toast.success("Got it — I'll reach out within a day.", {
+          description: 'This email already has an account — log in to track it from your dashboard.',
+          duration: 5000,
+        });
+        setTimeout(() => router.push('/login?callbackUrl=/dashboard/briefs'), 1200);
+        return;
+      }
+
       toast.success("Got it — I'll reach out within a day.", {
-        description: session ? 'You can track it from your dashboard.' : undefined,
+        description: 'You can track it from your dashboard.',
         duration: 4000,
       });
-      setTimeout(() => router.push(session ? '/dashboard/briefs' : '/'), 1200);
+      setTimeout(() => router.push('/dashboard/briefs'), 1200);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong');
     }
