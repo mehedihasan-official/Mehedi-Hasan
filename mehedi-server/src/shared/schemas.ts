@@ -229,6 +229,17 @@ export const orderUpdateSchema = z.object({
 });
 export type OrderUpdateInput = z.infer<typeof orderUpdateSchema>;
 
+// ---------- Me (self-service profile edits) ----------
+export const meUpdateSchema = z.object({
+  name: z.string().min(1).max(120).optional(),
+  phone: z.string().max(30).optional().nullable(),
+  whatsapp: z.string().max(30).optional().nullable(),
+  address: z.string().max(500).optional().nullable(),
+  timezone: z.string().max(60).optional().nullable(),
+  country: z.string().max(60).optional().nullable(),
+});
+export type MeUpdateInput = z.infer<typeof meUpdateSchema>;
+
 export const orderSchema = orderCreateSchema.extend({
   id: z.string(),
   orderCode: z.string(),

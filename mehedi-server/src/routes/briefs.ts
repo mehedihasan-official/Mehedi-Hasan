@@ -6,20 +6,56 @@ import { UserModel } from '../models/User.js';
 import { HttpError, asyncHandler } from '../lib/http.js';
 import { requireAuth, requireRole, optionalAuth } from '../middleware/auth.js';
 import { generateOrderCode } from '../lib/orderCode.js';
+import { createOrGetFirebaseUser } from '../lib/firebaseAdmin.js';
 import { toBrief } from '../lib/mappers.js';
 
 const router: RouterType = Router();
 
+// The temporary password given to accounts auto-created from a brief
+// submission. The frontend signs the person straight in with it and sends
+// them to set a real one — never shown to anyone but them, once.
+const DEFAULT_PASSWORD = '123456';
+
 // Public — this is what /start-project submits to. optionalAuth links the
-// brief to the submitter's account when they're logged in, without
-// requiring it.
+// brief to the submitter's account when they're logged in. If they're
+// anonymous and this email isn't registered yet, an account is created for
+// them on the spot so they land on a dashboard right away instead of a dead
+// end. `accountStatus` tells the frontend what happened so it can react:
+// 'linked' (already logged in), 'created' (brand new, needs a real
+// password), or 'existing' (this email already has an account — log in).
 router.post(
   '/',
   optionalAuth,
   asyncHandler(async (req, res) => {
     const input = briefCreateSchema.parse(req.body);
-    const brief = await BriefModel.create({ ...input, userId: req.user?.id ?? null });
-    res.status(201).json({ brief: toBrief(brief as never) });
+    const email = input.email.toLowerCase();
+
+    let userId = req.user?.id ?? null;
+    let accountStatus: 'linked' | 'created' | 'existing' = userId ? 'linked' : 'existing';
+
+    if (!userId) {
+      const existing = await UserModel.findOne({ 'emails.address': email });
+      if (existing) {
+        userId = String(existing._id);
+      } else {
+        const { uid } = await createOrGetFirebaseUser(email, DEFAULT_PASSWORD, input.name);
+        const created = await UserModel.create({
+          role: 'user',
+          name: input.name,
+          emails: [{ address: email, primary: true }],
+          phone: input.phone,
+          whatsapp: input.whatsapp,
+          source: 'contact_form',
+          active: true,
+          firebaseUid: uid,
+        });
+        userId = String(created._id);
+        accountStatus = 'created';
+      }
+    }
+
+    const brief = await BriefModel.create({ ...input, userId });
+    res.status(201).json({ brief: toBrief(brief as never), accountStatus });
   }),
 );
 

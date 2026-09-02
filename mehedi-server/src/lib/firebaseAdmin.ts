@@ -18,3 +18,24 @@ function getFirebaseApp(): App {
 export async function verifyFirebaseToken(idToken: string): Promise<DecodedIdToken> {
   return getAuth(getFirebaseApp()).verifyIdToken(idToken);
 }
+
+// Creates a Firebase account for someone who submitted a brief without being
+// logged in. If the email already has a Firebase account (e.g. a partial
+// sign-up that never finished), reuse it instead of erroring.
+export async function createOrGetFirebaseUser(
+  email: string,
+  password: string,
+  displayName: string,
+): Promise<{ uid: string }> {
+  const auth = getAuth(getFirebaseApp());
+  try {
+    const created = await auth.createUser({ email, password, displayName });
+    return { uid: created.uid };
+  } catch (err) {
+    if ((err as { code?: string }).code === 'auth/email-already-exists') {
+      const existing = await auth.getUserByEmail(email);
+      return { uid: existing.uid };
+    }
+    throw err;
+  }
+}
