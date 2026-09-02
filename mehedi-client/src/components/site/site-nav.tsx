@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { useSession } from '@/hooks/use-session';
 import { cn } from '@/lib/utils';
 
 const links = [
@@ -16,6 +19,7 @@ const links = [
 
 export function SiteNav() {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <header className="sticky top-0 z-40 border-b border-app/60 backdrop-blur-xl bg-app/70">
@@ -40,24 +44,41 @@ export function SiteNav() {
         </nav>
 
         <div className="hidden md:flex md:items-center md:gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/register">Sign up</Link>
-          </Button>
+          <ThemeToggle />
+          {session ? (
+            <Link href={session.user.role === 'admin' ? '/admin' : '/dashboard'} aria-label="Your dashboard">
+              <Avatar name={session.user.name} src={session.user.avatar ?? undefined} size="sm" />
+            </Link>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/register">Sign up</Link>
+              </Button>
+            </>
+          )}
           <Button asChild size="sm">
             <Link href="/start-project">Start a Project</Link>
           </Button>
         </div>
 
-        <button
-          className="grid h-10 w-10 place-items-center rounded-lg border border-app text-body md:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          {session ? (
+            <Link href={session.user.role === 'admin' ? '/admin' : '/dashboard'} aria-label="Your dashboard">
+              <Avatar name={session.user.name} src={session.user.avatar ?? undefined} size="sm" />
+            </Link>
+          ) : null}
+          <button
+            className="grid h-10 w-10 place-items-center rounded-lg border border-app text-body"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       <div className={cn('overflow-hidden border-t border-app md:hidden', open ? 'max-h-96' : 'max-h-0')}>
@@ -73,12 +94,22 @@ export function SiteNav() {
             </Link>
           ))}
           <div className="mt-2 grid grid-cols-3 gap-2">
-            <Button asChild variant="ghost" className="col-span-1">
-              <Link href="/login" onClick={() => setOpen(false)}>Log in</Link>
-            </Button>
-            <Button asChild variant="outline" className="col-span-1">
-              <Link href="/register" onClick={() => setOpen(false)}>Sign up</Link>
-            </Button>
+            {session ? (
+              <Button asChild variant="outline" className="col-span-2">
+                <Link href={session.user.role === 'admin' ? '/admin' : '/dashboard'} onClick={() => setOpen(false)}>
+                  Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" className="col-span-1">
+                  <Link href="/login" onClick={() => setOpen(false)}>Log in</Link>
+                </Button>
+                <Button asChild variant="outline" className="col-span-1">
+                  <Link href="/register" onClick={() => setOpen(false)}>Sign up</Link>
+                </Button>
+              </>
+            )}
             <Button asChild className="col-span-1">
               <Link href="/start-project" onClick={() => setOpen(false)}>Start</Link>
             </Button>

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SignOutButton } from '@/components/auth/sign-out-button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const nav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
@@ -40,9 +41,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">M</span>
             Admin
           </Link>
-          <Button size="sm" variant="outline" onClick={() => setOpen((v) => !v)}>
-            Menu
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button size="sm" variant="outline" onClick={() => setOpen((v) => !v)}>
+              Menu
+            </Button>
+          </div>
         </header>
 
         {open ? (
@@ -101,8 +105,9 @@ function SidebarNav({
 
 function SidebarLogout({ inline }: { inline?: boolean } = {}) {
   return (
-    <div className={cn(inline ? '' : 'p-3')}>
-      <SignOutButton />
+    <div className={cn('flex items-center gap-2', inline ? '' : 'p-3')}>
+      <SignOutButton className="flex-1" />
+      {!inline ? <ThemeToggle /> : null}
     </div>
   );
 }
