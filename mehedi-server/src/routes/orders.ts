@@ -1,24 +1,15 @@
 import { Router, type Router as RouterType } from 'express';
-import crypto from 'node:crypto';
 import { orderCreateSchema, orderUpdateSchema } from '../shared/index.js';
 import { OrderModel } from '../models/Order.js';
 import { UserModel } from '../models/User.js';
 import { HttpError, asyncHandler } from '../lib/http.js';
 import { requireAuth } from '../middleware/auth.js';
+import { generateOrderCode } from '../lib/orderCode.js';
 import { toOrder } from '../lib/mappers.js';
 
 const router: RouterType = Router();
 
 router.use(requireAuth);
-
-async function generateOrderCode(): Promise<string> {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const code = `ORD-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-    const exists = await OrderModel.exists({ orderCode: code });
-    if (!exists) return code;
-  }
-  throw new HttpError(500, 'Could not generate a unique order code');
-}
 
 router.post(
   '/',
@@ -30,6 +21,12 @@ router.post(
       clientId: req.user!.id,
       orderCode,
     });
+
+    // Placing an order is what turns a plain registered "user" into a client.
+    if (req.user!.role === 'user') {
+      await UserModel.findByIdAndUpdate(req.user!.id, { $set: { role: 'client' } });
+    }
+
     res.status(201).json({ order: toOrder(order as never) });
   }),
 );
@@ -37,11 +34,28 @@ router.post(
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const filter = req.user!.role === 'admin' ? {} : { clientId: req.user!.id };
-    const orders = await OrderModel.find(filter).sort({ createdAt: -1 }).lean();
+    const isAdmin = req.user!.role === 'admin';
+    const filter: Record<string, unknown> = isAdmin ? {} : { clientId: req.user!.id };
 
-    if (req.user!.role !== 'admin') {
-      res.json({ orders: orders.map((o) => toOrder(o as never)) });
+    const statusParam = String(req.query.status ?? '').trim();
+    if (isAdmin && statusParam) {
+      filter.status = { $in: statusParam.split(',').map((s) => s.trim()) };
+    }
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+
+    const [orders, total] = await Promise.all([
+      OrderModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      OrderModel.countDocuments(filter),
+    ]);
+
+    if (!isAdmin) {
+      res.json({ orders: orders.map((o) => toOrder(o as never)), total, page, pages: Math.ceil(total / limit) });
       return;
     }
 
@@ -58,6 +72,9 @@ router.get(
 
     res.json({
       orders: orders.map((o) => toOrder(o as never, clientMap.get(String(o.clientId)))),
+      total,
+      page,
+      pages: Math.ceil(total / limit),
     });
   }),
 );

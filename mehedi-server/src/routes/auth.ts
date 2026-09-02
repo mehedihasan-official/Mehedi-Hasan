@@ -30,8 +30,10 @@ router.post(
     if (!user) user = await UserModel.findOne({ 'emails.address': email });
 
     if (!user) {
+      // New sign-ups start as a plain "user" — they become a "client" the
+      // moment they (or an admin, on their behalf) start an order.
       user = await UserModel.create({
-        role: 'client',
+        role: 'user',
         name: name || decoded.name || email.split('@')[0],
         emails: [{ address: email, primary: true }],
         avatar: decoded.picture ?? undefined,
@@ -40,6 +42,7 @@ router.post(
         firebaseUid: decoded.uid,
       });
     } else {
+      if (user.blocked) throw new HttpError(403, 'This account has been blocked');
       if (!user.active) throw new HttpError(403, 'This account has been deactivated');
       if (!user.firebaseUid) user.firebaseUid = decoded.uid;
       if (decoded.picture && !user.avatar) user.avatar = decoded.picture;

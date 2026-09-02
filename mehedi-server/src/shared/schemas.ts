@@ -1,15 +1,15 @@
 import { z } from 'zod';
 import {
   BUDGET_RANGES,
+  BRIEF_STATUSES,
   CURRENCIES,
   INVOICE_STATUSES,
-  LEAD_SOURCES,
-  LEAD_STATUSES,
   ORDER_STATUSES,
   PROJECT_CATEGORIES,
   PROJECT_STATUSES,
   ROLES,
   SERVICE_TYPES,
+  SOURCES,
   STAGE_STATUSES,
   TIMELINES,
 } from './enums.js';
@@ -33,7 +33,10 @@ export const userSchema = z.object({
   timezone: z.string().max(60).optional().nullable(),
   country: z.string().max(60).optional().nullable(),
   avatar: z.string().url().optional().nullable(),
+  source: z.enum(SOURCES).optional().nullable(),
   active: z.boolean().default(true),
+  blocked: z.boolean().default(false),
+  lastLoginAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -48,7 +51,7 @@ export const clientCreateSchema = z.object({
   address: z.string().max(500).optional().nullable(),
   timezone: z.string().max(60).optional().nullable(),
   country: z.string().max(60).optional().nullable(),
-  source: z.enum(LEAD_SOURCES).optional().nullable(),
+  source: z.enum(SOURCES).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
   avatar: z.string().url().optional().nullable(),
 });
@@ -70,8 +73,8 @@ export const clientSchema = clientCreateSchema.extend({
 });
 export type Client = z.infer<typeof clientSchema>;
 
-// ---------- Lead ----------
-export const leadCreateSchema = z.object({
+// ---------- Brief (the /start-project intake form) ----------
+export const briefCreateSchema = z.object({
   name: z.string().min(1).max(120),
   email: z.string().email(),
   phone: z.string().max(30).optional().nullable(),
@@ -80,18 +83,24 @@ export const leadCreateSchema = z.object({
   budgetRange: z.enum(BUDGET_RANGES),
   timeline: z.enum(TIMELINES),
   message: z.string().max(4000).optional().nullable(),
-  source: z.enum(LEAD_SOURCES).default('contact_form'),
+  source: z.enum(SOURCES).default('contact_form'),
 });
-export type LeadCreateInput = z.infer<typeof leadCreateSchema>;
+export type BriefCreateInput = z.infer<typeof briefCreateSchema>;
 
-export const leadSchema = leadCreateSchema.extend({
+export const briefUpdateSchema = z.object({
+  status: z.enum(BRIEF_STATUSES),
+});
+export type BriefUpdateInput = z.infer<typeof briefUpdateSchema>;
+
+export const briefSchema = briefCreateSchema.extend({
   id: z.string(),
-  status: z.enum(LEAD_STATUSES),
-  convertedToClientId: z.string().nullable(),
+  status: z.enum(BRIEF_STATUSES),
+  userId: z.string().nullable(),
+  orderId: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
-export type Lead = z.infer<typeof leadSchema>;
+export type Brief = z.infer<typeof briefSchema>;
 
 // ---------- Project ----------
 export const projectLinksSchema = z.object({
@@ -211,8 +220,12 @@ export const orderCreateSchema = z.object({
 });
 export type OrderCreateInput = z.infer<typeof orderCreateSchema>;
 
+// Admin-only edits made from the order detail page.
 export const orderUpdateSchema = z.object({
-  status: z.enum(ORDER_STATUSES),
+  status: z.enum(ORDER_STATUSES).optional(),
+  progress: z.number().int().min(0).max(100).optional(),
+  projectUrl: z.string().url().max(500).optional().nullable(),
+  notes: z.string().max(4000).optional().nullable(),
 });
 export type OrderUpdateInput = z.infer<typeof orderUpdateSchema>;
 
@@ -223,6 +236,9 @@ export const orderSchema = orderCreateSchema.extend({
   clientName: z.string().optional(),
   clientEmail: z.string().optional(),
   status: z.enum(ORDER_STATUSES),
+  progress: z.number().int().min(0).max(100).default(0),
+  projectUrl: z.string().url().nullable(),
+  notes: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

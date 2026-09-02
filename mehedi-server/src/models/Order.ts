@@ -10,6 +10,9 @@ const orderSchema = new Schema(
     timeline: { type: String, enum: TIMELINES, required: true },
     description: { type: String, required: true },
     status: { type: String, enum: ORDER_STATUSES, default: 'pending', index: true },
+    progress: { type: Number, default: 0, min: 0, max: 100 },
+    projectUrl: { type: String, default: null },
+    notes: { type: String, default: null },
   },
   { timestamps: true },
 );

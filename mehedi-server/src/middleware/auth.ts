@@ -24,6 +24,22 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
   }
 }
 
+// Like requireAuth, but never rejects — attaches req.user when a valid
+// bearer token is present, otherwise just moves on. Used by routes (like
+// submitting a brief) that behave the same for logged-in and anonymous
+// visitors, but want to know which one it is.
+export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) {
+    try {
+      req.user = verifyToken(header.slice(7));
+    } catch {
+      // ignore an invalid/expired token — treat the request as anonymous
+    }
+  }
+  next();
+}
+
 export function requireRole(...roles: Role[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) return next(new HttpError(401, 'Not authenticated'));

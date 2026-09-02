@@ -8,8 +8,9 @@ import { connectDatabase } from './config/db.js';
 import { logger } from './config/logger.js';
 import authRouter from './routes/auth.js';
 import clientsRouter from './routes/clients.js';
-import leadsRouter from './routes/leads.js';
+import briefsRouter from './routes/briefs.js';
 import ordersRouter from './routes/orders.js';
+import usersRouter from './routes/users.js';
 import meRouter from './routes/me.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
@@ -68,9 +69,10 @@ export function createApp(): Express {
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
   app.use('/auth', authLimiter, authRouter);
-  app.use('/leads', publicLimiter, leadsRouter);
+  app.use('/briefs', publicLimiter, briefsRouter);
   app.use('/clients', clientsRouter);
   app.use('/orders', ordersRouter);
+  app.use('/users', usersRouter);
   app.use('/me', meRouter);
 
   app.use(notFound);

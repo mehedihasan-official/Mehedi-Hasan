@@ -1,4 +1,6 @@
-export const ROLES = ['admin', 'client'] as const;
+// 'user' = registered but hasn't started a project yet. Promoted to 'client'
+// the moment they (or an admin, on their behalf) start an order.
+export const ROLES = ['admin', 'client', 'user'] as const;
 export type Role = (typeof ROLES)[number];
 
 export const SERVICE_TYPES = ['web_app', 'mobile_app', 'meta_ads', 'wordpress', 'other'] as const;
@@ -28,8 +30,8 @@ export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 export const STAGE_STATUSES = ['planned', 'in_progress', 'delivered', 'approved'] as const;
 export type StageStatus = (typeof STAGE_STATUSES)[number];
 
-export const LEAD_STATUSES = ['new', 'contacted', 'converted', 'lost'] as const;
-export type LeadStatus = (typeof LEAD_STATUSES)[number];
+export const BRIEF_STATUSES = ['new', 'contacted', 'converted', 'lost'] as const;
+export type BriefStatus = (typeof BRIEF_STATUSES)[number];
 
 export const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'overdue'] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
@@ -37,7 +39,8 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 export const CURRENCIES = ['USD', 'BDT'] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
-export const LEAD_SOURCES = [
+// Shared by both Brief.source and Client.source — "how did we find this person".
+export const SOURCES = [
   'fiverr',
   'direct',
   'referral',
@@ -45,7 +48,7 @@ export const LEAD_SOURCES = [
   'self_registered',
   'other',
 ] as const;
-export type LeadSource = (typeof LEAD_SOURCES)[number];
+export type Source = (typeof SOURCES)[number];
 
 export const ORDER_STATUSES = [
   'pending',

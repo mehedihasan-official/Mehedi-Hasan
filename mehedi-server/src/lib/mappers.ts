@@ -1,6 +1,7 @@
 import type { UserDoc } from '../models/User.js';
 import type { OrderDoc } from '../models/Order.js';
-import type { Client, Order, SessionUser } from '../shared/index.js';
+import type { BriefDoc } from '../models/Brief.js';
+import type { Brief, Client, Order, SessionUser, User } from '../shared/index.js';
 
 type WithId<T> = T & { _id: unknown; createdAt?: Date; updatedAt?: Date };
 
@@ -16,6 +17,34 @@ export function toSessionUser(user: WithId<UserDoc>): SessionUser {
     name: user.name,
     email: primaryEmail(user),
     avatar: user.avatar ?? null,
+  };
+}
+
+// Full account shape for the admin Users page — distinct from toClient(),
+// which is the CRM-style shape (notes, lifetime value, etc.) for people who
+// are already clients.
+export function toUser(user: WithId<UserDoc>): User {
+  return {
+    id: String(user._id),
+    role: user.role as User['role'],
+    name: user.name,
+    emails: user.emails.map((e) => ({
+      address: e.address,
+      label: e.label ?? undefined,
+      primary: !!e.primary,
+    })),
+    phone: user.phone ?? null,
+    whatsapp: user.whatsapp ?? null,
+    address: user.address ?? null,
+    timezone: user.timezone ?? null,
+    country: user.country ?? null,
+    avatar: user.avatar ?? null,
+    source: (user.source as User['source']) ?? null,
+    active: !!user.active,
+    blocked: !!user.blocked,
+    lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
+    createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt: user.updatedAt ? user.updatedAt.toISOString() : new Date().toISOString(),
   };
 }
 
@@ -63,7 +92,30 @@ export function toOrder(
     timeline: order.timeline as Order['timeline'],
     description: order.description,
     status: order.status as Order['status'],
+    progress: order.progress ?? 0,
+    projectUrl: order.projectUrl ?? null,
+    notes: order.notes ?? null,
     createdAt: order.createdAt ? order.createdAt.toISOString() : new Date().toISOString(),
     updatedAt: order.updatedAt ? order.updatedAt.toISOString() : new Date().toISOString(),
+  };
+}
+
+export function toBrief(brief: WithId<BriefDoc>): Brief {
+  return {
+    id: String(brief._id),
+    name: brief.name,
+    email: brief.email,
+    phone: brief.phone ?? null,
+    whatsapp: brief.whatsapp ?? null,
+    serviceType: brief.serviceType as Brief['serviceType'],
+    budgetRange: brief.budgetRange as Brief['budgetRange'],
+    timeline: brief.timeline as Brief['timeline'],
+    message: brief.message ?? null,
+    source: (brief.source as Brief['source']) ?? 'contact_form',
+    status: (brief.status as Brief['status']) ?? 'new',
+    userId: brief.userId ? String(brief.userId) : null,
+    orderId: brief.orderId ? String(brief.orderId) : null,
+    createdAt: brief.createdAt ? brief.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt: brief.updatedAt ? brief.updatedAt.toISOString() : new Date().toISOString(),
   };
 }

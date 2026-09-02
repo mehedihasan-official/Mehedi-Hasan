@@ -11,7 +11,7 @@ const emailEntrySchema = new Schema(
 
 const userSchema = new Schema(
   {
-    role: { type: String, enum: ['admin', 'client'], required: true, index: true },
+    role: { type: String, enum: ['admin', 'client', 'user'], required: true, index: true },
     name: { type: String, required: true, trim: true },
     emails: {
       type: [emailEntrySchema],
@@ -28,6 +28,9 @@ const userSchema = new Schema(
     notes: { type: String },
     firebaseUid: { type: String, index: true, sparse: true, unique: true },
     active: { type: Boolean, default: true, index: true },
+    // A blocked user keeps their record (so the email stays recognized and
+    // rejected) but can no longer log in or register again.
+    blocked: { type: Boolean, default: false, index: true },
     lastLoginAt: { type: Date },
     lastActivityAt: { type: Date, default: () => new Date() },
   },
