@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +10,7 @@ import { clientCreateSchema, type Client, type ClientCreateInput } from '@/share
 import { Button } from '@/components/ui/button';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api';
+import { useSession } from '@/hooks/use-session';
 
 export default function NewClientPage() {
   const router = useRouter();
@@ -48,12 +48,12 @@ export default function NewClientPage() {
 
   async function onSubmit(values: ClientCreateInput) {
     try {
-      const res = await apiFetch<{ client: Client; inviteToken: string }>('/clients', {
+      const res = await apiFetch<{ client: Client }>('/clients', {
         method: 'POST',
         body: JSON.stringify(values),
         token: session?.apiToken ?? null,
       });
-      toast.success(`${res.client.name} added — invite token generated.`);
+      toast.success(`${res.client.name} added.`);
       router.push(`/admin/clients/${res.client.id}`);
       router.refresh();
     } catch (err) {
@@ -68,7 +68,10 @@ export default function NewClientPage() {
       </Link>
       <div>
         <h1 className="text-3xl font-bold tracking-tight">New client</h1>
-        <p className="mt-2 text-muted">Add a client manually. Their invite email flow ships next slice.</p>
+        <p className="mt-2 text-muted">
+          Add a client manually. If this email later signs up (email/password or Google), it links
+          to this profile automatically.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-2xl border border-app bg-card p-6">

@@ -1,5 +1,4 @@
 import { Router, type Router as RouterType } from 'express';
-import crypto from 'node:crypto';
 import { clientCreateSchema, clientUpdateSchema } from '../shared/index.js';
 import { UserModel } from '../models/User.js';
 import { ProjectModel } from '../models/Project.js';
@@ -82,8 +81,6 @@ router.post(
   asyncHandler(async (req, res) => {
     const input = clientCreateSchema.parse(req.body);
     ensureOnePrimary(input.emails);
-    const inviteToken = crypto.randomBytes(24).toString('hex');
-    const inviteTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     const created = await UserModel.create({
       role: 'client',
@@ -98,11 +95,9 @@ router.post(
       notes: input.notes,
       avatar: input.avatar,
       active: true,
-      inviteToken,
-      inviteTokenExpires,
     });
 
-    res.status(201).json({ client: toClient(created as never), inviteToken });
+    res.status(201).json({ client: toClient(created as never) });
   }),
 );
 

@@ -15,7 +15,12 @@ const envSchema = z.object({
 
   ADMIN_EMAIL: z.string().email().default('skmehedihasan.jr1@gmail.com'),
   ADMIN_NAME: z.string().default('Mehedi Hasan'),
-  ADMIN_PASSWORD: z.string().min(8).default('change-me-on-first-login'),
+
+  // Firebase Admin SDK — Firebase Console -> Project Settings -> Service
+  // Accounts -> Generate new private key.
+  FIREBASE_PROJECT_ID: z.string().min(1, 'FIREBASE_PROJECT_ID is required'),
+  FIREBASE_CLIENT_EMAIL: z.string().min(1, 'FIREBASE_CLIENT_EMAIL is required'),
+  FIREBASE_PRIVATE_KEY: z.string().min(1, 'FIREBASE_PRIVATE_KEY is required'),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -35,6 +35,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent className="grid gap-2 text-sm">
             <QuickLink href="/admin/clients" title="Clients" desc="Card grid + profile pages" />
+            <QuickLink href="/admin/orders" title="Orders" desc="Self-service orders + tracking codes" />
             <QuickLink href="/admin/leads" title="Leads inbox" desc="Convert leads into clients" />
             <QuickLink href="/admin/projects" title="Projects" desc="Kanban + stage timelines" />
           </CardContent>

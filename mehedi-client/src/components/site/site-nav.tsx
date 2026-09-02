@@ -43,6 +43,9 @@ export function SiteNav() {
           <Button asChild variant="ghost" size="sm">
             <Link href="/login">Log in</Link>
           </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/register">Sign up</Link>
+          </Button>
           <Button asChild size="sm">
             <Link href="/start-project">Start a Project</Link>
           </Button>
@@ -69,11 +72,14 @@ export function SiteNav() {
               {l.label}
             </Link>
           ))}
-          <div className="mt-2 flex gap-2">
-            <Button asChild variant="outline" className="flex-1">
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <Button asChild variant="ghost" className="col-span-1">
               <Link href="/login" onClick={() => setOpen(false)}>Log in</Link>
             </Button>
-            <Button asChild className="flex-1">
+            <Button asChild variant="outline" className="col-span-1">
+              <Link href="/register" onClick={() => setOpen(false)}>Sign up</Link>
+            </Button>
+            <Button asChild className="col-span-1">
               <Link href="/start-project" onClick={() => setOpen(false)}>Start</Link>
             </Button>
           </div>

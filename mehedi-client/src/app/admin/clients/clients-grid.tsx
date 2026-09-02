@@ -64,6 +64,7 @@ function ClientCard({ client }: { client: Client }) {
           <div className="flex items-center gap-2">
             <div className="truncate font-semibold text-body">{client.name}</div>
             {!client.active ? <Badge tone="warning">Archived</Badge> : null}
+            {client.source === 'self_registered' ? <Badge tone="brand">Self-registered</Badge> : null}
           </div>
           <div className="truncate text-xs text-muted">{primary?.address}</div>
         </div>

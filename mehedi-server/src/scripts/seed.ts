@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import { connectDatabase, disconnectDatabase } from '../config/db.js';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js';
@@ -60,7 +59,6 @@ async function main(): Promise<void> {
   });
   const secondaryEmail = 'mehedihasanshopnil.jr@gmail.com';
   if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash(env.ADMIN_PASSWORD, 12);
     await UserModel.create({
       role: 'admin',
       name: env.ADMIN_NAME,
@@ -68,7 +66,6 @@ async function main(): Promise<void> {
         { address: env.ADMIN_EMAIL, primary: true, label: 'Primary' },
         { address: secondaryEmail, primary: false, label: 'Secondary' },
       ],
-      passwordHash,
       country: 'Bangladesh',
       timezone: 'Asia/Dhaka',
       whatsapp: '+8801316265634',

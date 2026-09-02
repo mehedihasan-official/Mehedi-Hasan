@@ -1,5 +1,6 @@
 import type { UserDoc } from '../models/User.js';
-import type { Client, SessionUser } from '../shared/index.js';
+import type { OrderDoc } from '../models/Order.js';
+import type { Client, Order, SessionUser } from '../shared/index.js';
 
 type WithId<T> = T & { _id: unknown; createdAt?: Date; updatedAt?: Date };
 
@@ -44,5 +45,25 @@ export function toClient(user: WithId<UserDoc>, extras?: {
     lastActivityAt: user.lastActivityAt ? user.lastActivityAt.toISOString() : null,
     createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString(),
     updatedAt: user.updatedAt ? user.updatedAt.toISOString() : new Date().toISOString(),
+  };
+}
+
+export function toOrder(
+  order: WithId<OrderDoc>,
+  client?: { name?: string; email?: string } | null,
+): Order {
+  return {
+    id: String(order._id),
+    orderCode: order.orderCode,
+    clientId: String(order.clientId),
+    clientName: client?.name,
+    clientEmail: client?.email,
+    serviceType: order.serviceType as Order['serviceType'],
+    budgetRange: order.budgetRange as Order['budgetRange'],
+    timeline: order.timeline as Order['timeline'],
+    description: order.description,
+    status: order.status as Order['status'],
+    createdAt: order.createdAt ? order.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt: order.updatedAt ? order.updatedAt.toISOString() : new Date().toISOString(),
   };
 }

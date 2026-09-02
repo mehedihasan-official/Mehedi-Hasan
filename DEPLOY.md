@@ -9,7 +9,11 @@ Deploy the **server first**, then the client (the client needs the server's URL 
 ## Prerequisites
 
 - MongoDB Atlas cluster with connection string ready
-- (Optional) Resend, Google OAuth, Cloudinary credentials
+- A Firebase project with **Email/Password** and **Google** sign-in providers enabled
+  (Firebase Console → Authentication → Sign-in method), the web app config (Project Settings →
+  General → Your apps), and a service-account key (Project Settings → Service Accounts → Generate
+  new private key)
+- (Optional) Resend, Cloudinary credentials
 
 ---
 
@@ -27,13 +31,15 @@ Deploy the **server first**, then the client (the client needs the server's URL 
 
    | Key             | Value                                                                                     |
    | --------------- | ----------------------------------------------------------------------------------------- |
-   | `MONGODB_URI`   | your MongoDB Atlas connection string (must include `/mehedi_platform` as the DB name)     |
-   | `JWT_SECRET`    | a long random string (generate: `openssl rand -base64 32`) — **remember this value**       |
-   | `ADMIN_EMAIL`   | `skmehedihasan.jr1@gmail.com`                                                             |
-   | `ADMIN_NAME`    | `Mehedi Hasan`                                                                            |
-   | `ADMIN_PASSWORD`| a strong password — this is your first login                                              |
-   | `CORS_ORIGINS`  | leave empty for now; you'll fill it after the client is deployed                          |
-   | `NODE_ENV`      | `production`                                                                              |
+   | `MONGODB_URI`          | your MongoDB Atlas connection string (must include `/mehedi_platform` as the DB name) |
+   | `JWT_SECRET`           | a long random string (generate: `openssl rand -base64 32`) — **remember this value**   |
+   | `ADMIN_EMAIL`          | `skmehedihasan.jr1@gmail.com`                                                         |
+   | `ADMIN_NAME`           | `Mehedi Hasan`                                                                        |
+   | `FIREBASE_PROJECT_ID`  | from the Firebase service-account JSON                                               |
+   | `FIREBASE_CLIENT_EMAIL`| from the Firebase service-account JSON                                               |
+   | `FIREBASE_PRIVATE_KEY` | from the Firebase service-account JSON (keep the `\n` escapes, wrap in quotes)        |
+   | `CORS_ORIGINS`         | leave empty for now; you'll fill it after the client is deployed                      |
+   | `NODE_ENV`             | `production`                                                                          |
 
 4. Click **Deploy**. Wait for it to finish.
 5. Once deployed, note the URL (e.g. `https://mehedi-server-abc123.vercel.app`). Test it: opening the URL should return `{"ok":true,"service":"mehedi-server"}`.
@@ -45,12 +51,14 @@ Vercel serverless can't run long scripts, so seed locally against Atlas:
 ```bash
 cd mehedi-server
 cp .env.example .env
-# Edit .env — set MONGODB_URI to the Atlas string, ADMIN_PASSWORD to whatever you used on Vercel
+# Edit .env — set MONGODB_URI to the Atlas string and the same FIREBASE_* values you used on Vercel
 npm install
 npm run seed
 ```
 
-You should see logs saying "Seeded admin" and "Seeded client Brian Caceres" etc.
+You should see logs saying "Seeded admin" and "Seeded client Brian Caceres" etc. The seeded admin
+has no password — sign in by registering/logging in with `ADMIN_EMAIL` via Firebase (email/password
+or Google) and the backend links it to this record automatically on first login.
 
 ---
 
@@ -64,17 +72,23 @@ You should see logs saying "Seeded admin" and "Seeded client Brian Caceres" etc.
    - **Build/Install/Output**: leave defaults
 3. Expand **Environment Variables** and add:
 
-   | Key                          | Value                                                                    |
-   | ---------------------------- | ------------------------------------------------------------------------ |
-   | `NEXTAUTH_SECRET`            | **same value** you used for `JWT_SECRET` on the server                   |
-   | `NEXTAUTH_URL`               | leave empty (Vercel sets `VERCEL_URL` automatically; NextAuth uses that) |
-   | `API_URL`                    | the server URL from Part 1, e.g. `https://mehedi-server-abc123.vercel.app` |
-   | `NEXT_PUBLIC_API_URL`        | same as `API_URL`                                                        |
-   | `NEXT_PUBLIC_APP_URL`        | leave empty for now; add your production domain if you have one          |
-   | `NEXT_PUBLIC_WHATSAPP_NUMBER`| your WhatsApp number, digits only e.g. `8801XXXXXXXXX`                   |
-   | `NEXT_PUBLIC_CALENDLY_URL`   | your Calendly booking link (optional)                                    |
-   | `GOOGLE_CLIENT_ID`           | (optional) Google OAuth client ID                                        |
-   | `GOOGLE_CLIENT_SECRET`       | (optional) Google OAuth client secret                                    |
+   | Key                                    | Value                                                                    |
+   | --------------------------------------- | ------------------------------------------------------------------------ |
+   | `JWT_SECRET`                             | **same value** you used for `JWT_SECRET` on the server                   |
+   | `API_URL`                                | the server URL from Part 1, e.g. `https://mehedi-server-abc123.vercel.app` |
+   | `NEXT_PUBLIC_API_URL`                    | same as `API_URL`                                                        |
+   | `NEXT_PUBLIC_APP_URL`                    | leave empty for now; add your production domain if you have one          |
+   | `NEXT_PUBLIC_WHATSAPP_NUMBER`            | your WhatsApp number, digits only e.g. `8801XXXXXXXXX`                   |
+   | `NEXT_PUBLIC_CALENDLY_URL`               | your Calendly booking link (optional)                                    |
+   | `NEXT_PUBLIC_FIREBASE_API_KEY`           | from the Firebase web app config                                         |
+   | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`       | from the Firebase web app config                                         |
+   | `NEXT_PUBLIC_FIREBASE_PROJECT_ID`        | from the Firebase web app config                                         |
+   | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`    | from the Firebase web app config                                         |
+   | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`| from the Firebase web app config                                        |
+   | `NEXT_PUBLIC_FIREBASE_APP_ID`            | from the Firebase web app config                                         |
+
+   In Firebase Console → Authentication → Settings → **Authorized domains**, add your Vercel client
+   domain (and any custom domain) — Firebase rejects sign-in from unlisted domains.
 
 4. Click **Deploy**.
 5. Once deployed, note the URL (e.g. `https://mehedi-client-xyz.vercel.app`).
@@ -97,8 +111,8 @@ Now that you know the client's URL, go back to the **server project** in Vercel:
 
 1. Open the client URL in a browser.
 2. Public pages should render: `/`, `/about`, `/services`, `/work`, `/contact`, `/start-project`.
-3. Go to `/login`, sign in with `skmehedihasan.jr1@gmail.com` and the `ADMIN_PASSWORD` you set.
-4. You should land on `/admin` and see the KPI dashboard. Click **Clients** — the 20 seeded clients should appear as cards.
+3. Go to `/register` and create a test account (email/password or Google) — it should land you on `/dashboard`.
+4. Go to `/login` and sign in with `skmehedihasan.jr1@gmail.com` (register it via Firebase if you haven't already). You should land on `/admin` and see the KPI dashboard. Click **Clients** — the 20 seeded clients should appear as cards.
 
 ---
 
@@ -106,7 +120,8 @@ Now that you know the client's URL, go back to the **server project** in Vercel:
 
 - Add your domain to the **client** project in Vercel (Settings → Domains). No change needed to `mehedi-server` unless the server also gets its own subdomain (e.g. `api.mehedihasan.dev`).
 - Update `CORS_ORIGINS` on the server to include the new domain.
-- Update `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` on the client to the new domain.
+- Update `NEXT_PUBLIC_APP_URL` on the client to the new domain.
+- Add the new domain to Firebase's **Authorized domains** list (Authentication → Settings).
 
 ---
 
@@ -115,10 +130,16 @@ Now that you know the client's URL, go back to the **server project** in Vercel:
 **Build fails: "MONGODB_URI is required"**
 The server tries to validate env at import time. Make sure `MONGODB_URI` is set in the Vercel project's env vars for **Production**, **Preview**, and **Development** (all three checkboxes).
 
-**Login says "Invalid email or password" even with the right password**
-The client's authorize callback runs on Vercel and fetches `API_URL/auth/login`. Check:
+**Login/register fails with a Firebase error**
+- Confirm Email/Password and Google are both enabled in Firebase Console → Authentication → Sign-in method.
+- Confirm the client's domain is in Firebase's Authorized domains list.
+- Confirm `NEXT_PUBLIC_FIREBASE_*` env vars match the web app config exactly.
+
+**Login succeeds in Firebase but then fails with "Invalid or expired Firebase token" or similar**
+The client exchanges the Firebase ID token for a session by calling `API_URL/auth/firebase`. Check:
 - `API_URL` in the client project is set to the server's URL (no trailing slash).
 - The server is actually deployed and returns `{"ok":true}` at its root URL.
+- `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` are set correctly on the server (same Firebase project as the client's config).
 - Server logs (Vercel dashboard → server project → Logs) show any errors.
 
 **CORS errors in browser console**

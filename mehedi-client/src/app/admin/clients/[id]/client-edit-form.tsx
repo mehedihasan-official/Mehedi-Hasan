@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2 } from 'lucide-react';
@@ -10,6 +9,7 @@ import { clientUpdateSchema, type Client, type ClientUpdateInput } from '@/share
 import { Button } from '@/components/ui/button';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { apiFetch } from '@/lib/api';
+import { useSession } from '@/hooks/use-session';
 
 export function ClientEditForm({ client }: { client: Client }) {
   const router = useRouter();

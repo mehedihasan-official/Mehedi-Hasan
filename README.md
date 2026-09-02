@@ -15,7 +15,7 @@ Open two terminals — one for each project.
 
 ```bash
 cd mehedi-server
-cp .env.example .env    # fill in MONGODB_URI, JWT_SECRET, ADMIN_PASSWORD, etc.
+cp .env.example .env    # fill in MONGODB_URI, JWT_SECRET, FIREBASE_* (Admin SDK service account), etc.
 npm install
 npm run seed            # creates the admin + real clients in MongoDB (first time only)
 npm run dev             # runs at http://localhost:4000
@@ -25,12 +25,15 @@ npm run dev             # runs at http://localhost:4000
 
 ```bash
 cd mehedi-client
-cp .env.example .env.local   # fill in NEXTAUTH_SECRET (must match server JWT_SECRET), etc.
+cp .env.example .env.local   # fill in JWT_SECRET (must match server), NEXT_PUBLIC_FIREBASE_*, etc.
 npm install
 npm run dev                  # runs at http://localhost:3000
 ```
 
-Then open <http://localhost:3000/login> and sign in as the admin email you set (default `skmehedihasan.jr1@gmail.com`) with the `ADMIN_PASSWORD` you chose.
+Auth runs through **Firebase** (email/password + Google) — registration is open, anyone can sign
+up at <http://localhost:3000/register>. To log in as admin, register/sign in with the admin email
+you set (default `skmehedihasan.jr1@gmail.com`) — the backend links it to the seeded admin record
+by email automatically.
 
 ## Shared code
 
@@ -51,4 +54,4 @@ Push to `main` and both projects auto-redeploy.
 
 ## Stack
 
-Next.js 15 · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style UI · Framer Motion · NextAuth v5 · Express · Mongoose · MongoDB · Cloudinary · Resend · Calendly · TanStack Query · Socket.io · Recharts
+Next.js 15 · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style UI · Framer Motion · Firebase Auth · Express · Mongoose · MongoDB · Cloudinary · Resend · Calendly · TanStack Query · Socket.io · Recharts

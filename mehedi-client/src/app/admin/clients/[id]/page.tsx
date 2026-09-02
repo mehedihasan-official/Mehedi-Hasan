@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Mail, Phone, MapPin, Clock, MessageCircle, ArrowLeft, Copy } from 'lucide-react';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 import { apiFetchSafe } from '@/lib/api';
 import type { Client } from '@/shared';
 import { Avatar } from '@/components/ui/avatar';
@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = await auth();
+  const session = await getSession();
   const { data, error } = await apiFetchSafe<{ client: Client | null }>(
     `/clients/${id}`,
     { client: null },

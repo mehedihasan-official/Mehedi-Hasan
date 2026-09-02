@@ -5,6 +5,7 @@ import {
   INVOICE_STATUSES,
   LEAD_SOURCES,
   LEAD_STATUSES,
+  ORDER_STATUSES,
   PROJECT_CATEGORIES,
   PROJECT_STATUSES,
   ROLES,
@@ -201,6 +202,32 @@ export const messageCreateSchema = z.object({
 });
 export type MessageCreateInput = z.infer<typeof messageCreateSchema>;
 
+// ---------- Order ----------
+export const orderCreateSchema = z.object({
+  serviceType: z.enum(SERVICE_TYPES),
+  budgetRange: z.enum(BUDGET_RANGES),
+  timeline: z.enum(TIMELINES),
+  description: z.string().min(1, 'Tell me a bit about what you need').max(4000),
+});
+export type OrderCreateInput = z.infer<typeof orderCreateSchema>;
+
+export const orderUpdateSchema = z.object({
+  status: z.enum(ORDER_STATUSES),
+});
+export type OrderUpdateInput = z.infer<typeof orderUpdateSchema>;
+
+export const orderSchema = orderCreateSchema.extend({
+  id: z.string(),
+  orderCode: z.string(),
+  clientId: z.string(),
+  clientName: z.string().optional(),
+  clientEmail: z.string().optional(),
+  status: z.enum(ORDER_STATUSES),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Order = z.infer<typeof orderSchema>;
+
 // ---------- Auth ----------
 export const loginInputSchema = z.object({
   email: z.string().email(),
@@ -208,12 +235,11 @@ export const loginInputSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginInputSchema>;
 
-export const inviteAcceptSchema = z.object({
-  token: z.string().min(10),
-  password: z.string().min(8, 'Use at least 8 characters').max(200),
+export const firebaseAuthInputSchema = z.object({
+  idToken: z.string().min(10),
   name: z.string().min(1).max(120).optional(),
 });
-export type InviteAcceptInput = z.infer<typeof inviteAcceptSchema>;
+export type FirebaseAuthInput = z.infer<typeof firebaseAuthInputSchema>;
 
 export const sessionUserSchema = z.object({
   id: z.string(),

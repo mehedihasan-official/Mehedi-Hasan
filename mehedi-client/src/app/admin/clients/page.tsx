@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 import { apiFetchSafe } from '@/lib/api';
 import type { Client } from '@/shared';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { ClientsGrid } from './clients-grid';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminClientsPage() {
-  const session = await auth();
+  const session = await getSession();
   const { data, error } = await apiFetchSafe<{ clients: Client[] }>(
     '/clients',
     { clients: [] },

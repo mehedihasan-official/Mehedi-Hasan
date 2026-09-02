@@ -3,9 +3,14 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { z } from 'zod';
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import { toast } from 'sonner';
-import { loginInputSchema, type LoginInput } from '@/shared';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
 import { auth } from '@/lib/firebase';
@@ -13,7 +18,21 @@ import { exchangeFirebaseSession } from '@/lib/auth-exchange';
 import { firebaseErrorMessage } from '@/lib/firebase-errors';
 import { GoogleIcon } from '@/components/icons/google-icon';
 
-export function LoginForm() {
+const registerSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required').max(120),
+    email: z.string().email(),
+    password: z.string().min(6, 'Use at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+type RegisterInput = z.infer<typeof registerSchema>;
+
+export function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get('callbackUrl') ?? '';
@@ -22,21 +41,22 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginInputSchema) });
+  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) });
 
   function destinationFor(role: string) {
     if (callbackUrl.startsWith('/admin') || callbackUrl.startsWith('/dashboard')) return callbackUrl;
     return role === 'admin' ? '/admin' : '/dashboard';
   }
 
-  async function onSubmit(values: LoginInput) {
+  async function onSubmit(values: RegisterInput) {
     try {
-      const cred = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = await exchangeFirebaseSession(cred.user);
+      const cred = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await updateProfile(cred.user, { displayName: values.name }).catch(() => {});
+      const user = await exchangeFirebaseSession(cred.user, values.name);
       router.push(destinationFor(user.role));
       router.refresh();
     } catch (err) {
-      toast.error(firebaseErrorMessage(err) || 'Login failed');
+      toast.error(firebaseErrorMessage(err) || 'Registration failed');
     }
   }
 
@@ -66,9 +86,14 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="login-email">Email</Label>
+          <Label htmlFor="register-name">Name</Label>
+          <Input id="register-name" placeholder="Jane Doe" autoComplete="name" {...register('name')} />
+          {errors.name ? <p className="text-xs text-red-400">{errors.name.message}</p> : null}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-email">Email</Label>
           <Input
-            id="login-email"
+            id="register-email"
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
@@ -77,21 +102,34 @@ export function LoginForm() {
           {errors.email ? <p className="text-xs text-red-400">{errors.email.message}</p> : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="login-password">Password</Label>
+          <Label htmlFor="register-password">Password</Label>
           <Input
-            id="login-password"
+            id="register-password"
             type="password"
             placeholder="••••••••"
-            autoComplete="current-password"
+            autoComplete="new-password"
             {...register('password')}
           />
           {errors.password ? (
             <p className="text-xs text-red-400">{errors.password.message}</p>
           ) : null}
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-confirm">Confirm password</Label>
+          <Input
+            id="register-confirm"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            {...register('confirmPassword')}
+          />
+          {errors.confirmPassword ? (
+            <p className="text-xs text-red-400">{errors.confirmPassword.message}</p>
+          ) : null}
+        </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
     </div>

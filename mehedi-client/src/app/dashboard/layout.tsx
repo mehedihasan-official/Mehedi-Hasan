@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { auth, signOut } from '@/auth';
-import { LayoutDashboard, FolderKanban, MessageCircle, Receipt, LogOut } from 'lucide-react';
+import { getSession } from '@/lib/session';
+import { SignOutButton } from '@/components/auth/sign-out-button';
+import { LayoutDashboard, FolderKanban, Package, MessageCircle, Receipt } from 'lucide-react';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  const session = await getSession();
   if (!session) redirect('/login?callbackUrl=/dashboard');
   if (session.user.role === 'admin') redirect('/admin');
 
@@ -17,15 +18,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </Link>
         <nav className="flex-1 space-y-1 p-3">
           <SideLink href="/dashboard" icon={LayoutDashboard} label="Overview" />
+          <SideLink href="/dashboard/orders" icon={Package} label="Orders" />
           <SideLink href="/dashboard/projects" icon={FolderKanban} label="Projects" />
           <SideLink href="/dashboard/messages" icon={MessageCircle} label="Messages" />
           <SideLink href="/dashboard/invoices" icon={Receipt} label="Invoices" />
         </nav>
-        <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }} className="p-3">
-          <button type="submit" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted hover:bg-card hover:text-body">
-            <LogOut className="h-4 w-4" /> Sign out
-          </button>
-        </form>
+        <div className="p-3">
+          <SignOutButton />
+        </div>
       </aside>
 
       <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>

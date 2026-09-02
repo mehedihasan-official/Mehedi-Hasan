@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { getSession } from '@/lib/session';
 import { apiFetchSafe } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import type { Lead } from '@/shared';
 export const dynamic = 'force-dynamic';
 
 export default async function LeadsPage() {
-  const session = await auth();
+  const session = await getSession();
   const { data, error } = await apiFetchSafe<{ leads: Lead[] }>(
     '/leads',
     { leads: [] },

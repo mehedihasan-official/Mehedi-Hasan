@@ -37,8 +37,25 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 export const CURRENCIES = ['USD', 'BDT'] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
-export const LEAD_SOURCES = ['fiverr', 'direct', 'referral', 'contact_form', 'other'] as const;
+export const LEAD_SOURCES = [
+  'fiverr',
+  'direct',
+  'referral',
+  'contact_form',
+  'self_registered',
+  'other',
+] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
+
+export const ORDER_STATUSES = [
+  'pending',
+  'reviewing',
+  'accepted',
+  'in_progress',
+  'delivered',
+  'cancelled',
+] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const BUDGET_RANGES = [
   'under_500',

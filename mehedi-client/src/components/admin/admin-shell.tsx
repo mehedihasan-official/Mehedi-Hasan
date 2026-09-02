@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
-import { LayoutDashboard, Users, FolderKanban, Inbox, Receipt, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, Inbox, Package, Receipt, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { SignOutButton } from '@/components/auth/sign-out-button';
 
 const nav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
   { href: '/admin/clients', label: 'Clients', icon: Users },
+  { href: '/admin/orders', label: 'Orders', icon: Package },
   { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
   { href: '/admin/leads', label: 'Leads', icon: Inbox },
   { href: '/admin/invoices', label: 'Invoices', icon: Receipt },
@@ -100,12 +101,7 @@ function SidebarNav({
 function SidebarLogout({ inline }: { inline?: boolean } = {}) {
   return (
     <div className={cn(inline ? '' : 'p-3')}>
-      <button
-        onClick={() => signOut({ callbackUrl: '/login' })}
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted hover:bg-card hover:text-body"
-      >
-        <LogOut className="h-4 w-4" /> Sign out
-      </button>
+      <SignOutButton />
     </div>
   );
 }
