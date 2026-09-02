@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '@/lib/session';
 import { SignOutButton } from '@/components/auth/sign-out-button';
-import { LayoutDashboard, FolderKanban, Package, MessageCircle, Receipt } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Inbox, Package, MessageCircle, Receipt } from 'lucide-react';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -18,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </Link>
         <nav className="flex-1 space-y-1 p-3">
           <SideLink href="/dashboard" icon={LayoutDashboard} label="Overview" />
+          <SideLink href="/dashboard/briefs" icon={Inbox} label="Briefs" />
           <SideLink href="/dashboard/orders" icon={Package} label="Orders" />
           <SideLink href="/dashboard/projects" icon={FolderKanban} label="Projects" />
           <SideLink href="/dashboard/messages" icon={MessageCircle} label="Messages" />
