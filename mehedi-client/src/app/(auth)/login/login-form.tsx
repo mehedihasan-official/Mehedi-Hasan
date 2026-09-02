@@ -12,11 +12,14 @@ import { auth } from '@/lib/firebase';
 import { exchangeFirebaseSession } from '@/lib/auth-exchange';
 import { firebaseErrorMessage } from '@/lib/firebase-errors';
 import { GoogleIcon } from '@/components/icons/google-icon';
+import { Spinner } from '@/components/ui/spinner';
+import { useState } from 'react';
 
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get('callbackUrl') ?? '';
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const {
     register,
@@ -33,6 +36,7 @@ export function LoginForm() {
     try {
       const cred = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = await exchangeFirebaseSession(cred.user);
+      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
       router.push(destinationFor(user.role));
       router.refresh();
     } catch (err) {
@@ -41,21 +45,25 @@ export function LoginForm() {
   }
 
   async function handleGoogle() {
+    setGoogleLoading(true);
     try {
       const cred = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = await exchangeFirebaseSession(cred.user);
+      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
       router.push(destinationFor(user.role));
       router.refresh();
     } catch (err) {
       const message = firebaseErrorMessage(err);
       if (message) toast.error(message);
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
   return (
     <div className="mt-8 space-y-5">
-      <Button type="button" variant="outline" className="w-full" size="lg" onClick={handleGoogle}>
-        <GoogleIcon className="h-4 w-4" /> Continue with Google
+      <Button type="button" variant="outline" className="w-full" size="lg" onClick={handleGoogle} disabled={googleLoading}>
+        {googleLoading ? <Spinner /> : <GoogleIcon className="h-4 w-4" />} Continue with Google
       </Button>
 
       <div className="relative flex items-center gap-3 text-xs text-subtle">
@@ -91,7 +99,7 @@ export function LoginForm() {
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? <Spinner /> : null} {isSubmitting ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
     </div>

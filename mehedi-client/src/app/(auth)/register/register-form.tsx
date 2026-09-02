@@ -17,6 +17,8 @@ import { auth } from '@/lib/firebase';
 import { exchangeFirebaseSession } from '@/lib/auth-exchange';
 import { firebaseErrorMessage } from '@/lib/firebase-errors';
 import { GoogleIcon } from '@/components/icons/google-icon';
+import { Spinner } from '@/components/ui/spinner';
+import { useState } from 'react';
 
 const registerSchema = z
   .object({
@@ -36,6 +38,7 @@ export function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get('callbackUrl') ?? '';
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const {
     register,
@@ -53,6 +56,7 @@ export function RegisterForm() {
       const cred = await createUserWithEmailAndPassword(auth, values.email, values.password);
       await updateProfile(cred.user, { displayName: values.name }).catch(() => {});
       const user = await exchangeFirebaseSession(cred.user, values.name);
+      toast.success(`Welcome, ${user.name.split(' ')[0]}! Your account is ready.`);
       router.push(destinationFor(user.role));
       router.refresh();
     } catch (err) {
@@ -61,21 +65,25 @@ export function RegisterForm() {
   }
 
   async function handleGoogle() {
+    setGoogleLoading(true);
     try {
       const cred = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = await exchangeFirebaseSession(cred.user);
+      toast.success(`Welcome, ${user.name.split(' ')[0]}!`);
       router.push(destinationFor(user.role));
       router.refresh();
     } catch (err) {
       const message = firebaseErrorMessage(err);
       if (message) toast.error(message);
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
   return (
     <div className="mt-8 space-y-5">
-      <Button type="button" variant="outline" className="w-full" size="lg" onClick={handleGoogle}>
-        <GoogleIcon className="h-4 w-4" /> Continue with Google
+      <Button type="button" variant="outline" className="w-full" size="lg" onClick={handleGoogle} disabled={googleLoading}>
+        {googleLoading ? <Spinner /> : <GoogleIcon className="h-4 w-4" />} Continue with Google
       </Button>
 
       <div className="relative flex items-center gap-3 text-xs text-subtle">
@@ -129,7 +137,7 @@ export function RegisterForm() {
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating account…' : 'Create account'}
+          {isSubmitting ? <Spinner /> : null} {isSubmitting ? 'Creating account…' : 'Create account'}
         </Button>
       </form>
     </div>
