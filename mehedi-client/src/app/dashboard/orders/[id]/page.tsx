@@ -5,6 +5,7 @@ import { apiFetchSafe } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { formatDate } from '@/lib/utils';
 import type { Order } from '@/shared';
 
@@ -46,12 +47,23 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4 border-t border-app pt-5 text-sm">
+            <ProgressBar value={data.order.progress} />
             <div className="flex flex-wrap gap-2">
               <Badge>{data.order.serviceType}</Badge>
               <Badge>{data.order.budgetRange}</Badge>
               <Badge>{data.order.timeline}</Badge>
             </div>
             <p className="whitespace-pre-wrap text-body">{data.order.description}</p>
+            {data.order.projectUrl ? (
+              <a
+                href={data.order.projectUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-brand-400 hover:underline"
+              >
+                View project →
+              </a>
+            ) : null}
             <p className="text-xs text-subtle">Placed {formatDate(data.order.createdAt)}</p>
           </CardContent>
         </Card>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { formatDate } from '@/lib/utils';
 import type { Order } from '@/shared';
 
@@ -63,10 +64,13 @@ export default async function OrdersPage() {
                     <Badge tone={STATUS_TONE[o.status]}>{o.status.replace('_', ' ')}</Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="flex flex-wrap gap-2 text-sm">
-                  <Badge>{o.serviceType}</Badge>
-                  <Badge>{o.budgetRange}</Badge>
-                  <Badge>{o.timeline}</Badge>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge>{o.serviceType}</Badge>
+                    <Badge>{o.budgetRange}</Badge>
+                    <Badge>{o.timeline}</Badge>
+                  </div>
+                  <ProgressBar value={o.progress} />
                 </CardContent>
               </Card>
             </Link>
