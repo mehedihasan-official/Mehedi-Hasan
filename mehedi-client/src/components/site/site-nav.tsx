@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ const links = [
 export function SiteNav() {
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
   return (
     <header className="sticky top-0 z-40 border-b border-app/60 backdrop-blur-xl bg-app/70">
@@ -32,15 +35,24 @@ export function SiteNav() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-sm text-muted transition-colors hover:text-body"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const active = isActive(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'relative py-1 text-sm transition-colors after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-linear-to-r after:from-brand-500 after:to-accent-500 after:transition-transform after:duration-200',
+                  active
+                    ? 'font-medium text-body after:scale-x-100'
+                    : 'text-muted hover:text-body hover:after:scale-x-100',
+                )}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden md:flex md:items-center md:gap-2">
@@ -83,16 +95,25 @@ export function SiteNav() {
 
       <div className={cn('overflow-hidden border-t border-app md:hidden', open ? 'max-h-96' : 'max-h-0')}>
         <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm text-body hover:bg-elev"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const active = isActive(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'rounded-lg border-l-2 px-3 py-2 text-sm transition-colors',
+                  active
+                    ? 'border-brand-500 bg-elev font-medium text-body'
+                    : 'border-transparent text-body hover:bg-elev',
+                )}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
           <div className="mt-2 grid grid-cols-3 gap-2">
             {session ? (
               <Button asChild variant="outline" className="col-span-2">
