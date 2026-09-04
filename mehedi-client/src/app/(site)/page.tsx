@@ -81,6 +81,10 @@ export default function HomePage() {
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Your idea, <span className="text-gradient-brand">shipped and earning</span>.
               </h1>
+              <p className="mt-4 text-base text-muted sm:text-lg">
+                You know your business. I build the tech that grows it — websites, apps, and ads
+                that save you hours, win you customers, and let you sleep at night.
+              </p>
             </div>
             <div className="relative w-28 shrink-0 sm:w-36">
               <div className="overflow-hidden rounded-3xl border border-app bg-card shadow-card">
@@ -109,7 +113,7 @@ export default function HomePage() {
               <h1 className="mt-6 hidden max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:mt-0 lg:block">
                 Your idea, <span className="text-gradient-brand">shipped and earning</span> — without the tech headache.
               </h1>
-              <p className="mt-6 max-w-2xl text-lg text-muted">
+              <p className="mt-6 hidden max-w-2xl text-lg text-muted lg:block">
                 You know your business. I build the tech that grows it — websites, apps, and ads that
                 save you hours, win you customers, and let you sleep at night. No jargon. No excuses.
                 Just work that ships.

@@ -3,6 +3,14 @@
 // publishedToPortfolio=true); for now it's curated here so the site
 // looks alive from day one.
 
+import type { StaticImageData } from 'next/image';
+import coredenzImg from '@/assets/images/coredenz-ecommerce.png';
+import dbseeImg from '@/assets/images/dbsee-site-screenshot.png';
+import platinumClubImg from '@/assets/images/platinum-club.png';
+import vtrCaceresImg from '@/assets/images/vtrcaseares.png';
+import intervalImg from '@/assets/images/interval-app.png';
+import rewardsImg from '@/assets/images/rewards.png';
+
 export type FeaturedProject = {
   slug: string;
   title: string;
@@ -10,11 +18,31 @@ export type FeaturedProject = {
   category: string;
   problem: string;
   outcome: string;
-  gradient: 'brand' | 'sunset' | 'ocean' | 'forest' | 'plum' | 'coral';
-  liveUrl?: string;
+  image: StaticImageData;
+  liveUrl: string;
 };
 
 export const FEATURED_PROJECTS: FeaturedProject[] = [
+  {
+    slug: 'coredenz',
+    title: 'Coredenz — Tech Gadgets Store',
+    clientName: 'Coredenz',
+    category: 'E-commerce',
+    problem: 'Needed a fast, trustworthy online store to sell tech gadgets directly to customers.',
+    outcome: 'Launched a modern storefront built to turn browsers into buyers.',
+    image: coredenzImg,
+    liveUrl: 'https://coredenz.vercel.app',
+  },
+  {
+    slug: 'dbsee-agency',
+    title: 'DBSEE Marketing Agency',
+    clientName: 'Salman',
+    category: 'Marketing / Agency',
+    problem: 'Agency was hidden online — no site to actually sell their services.',
+    outcome: '15+ pages, fully responsive, live in three weeks.',
+    image: dbseeImg,
+    liveUrl: 'https://dbsee-agency.vercel.app',
+  },
   {
     slug: 'platinum-club',
     title: 'Platinum Club — Members-Only Travel',
@@ -22,56 +50,38 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     category: 'Travel & Booking',
     problem: 'Needed a premium members-only booking flow that felt as high-end as the destinations.',
     outcome: 'Launched a fast, polished platform. Members book in under 90 seconds.',
-    gradient: 'brand',
-    liveUrl: 'https://travelleisure.vip',
+    image: platinumClubImg,
+    liveUrl: 'https://www.travelleisure.vip',
   },
   {
-    slug: 'travel-leisure',
-    title: 'Travel + Leisure Club',
+    slug: 'vtr-caceres-capital',
+    title: 'VTR Caceres Capital',
     clientName: 'Brian Caceres',
-    category: 'Travel & Booking',
-    problem: 'Old site scared off inquiries with slow load and dated design.',
-    outcome: 'Rebuilt in Next.js. Inquiries went up, bounce rate dropped.',
-    gradient: 'ocean',
-    liveUrl: 'https://travelclub.it.com',
+    category: 'Finance / Investment',
+    problem: 'Needed a capital & investment site that builds instant credibility with investors.',
+    outcome: 'Delivered a clean, professional site that presents the firm with confidence.',
+    image: vtrCaceresImg,
+    liveUrl: 'https://www.vtrcacerescapital.com',
   },
   {
-    slug: 'rci',
-    title: 'RCI Travel Portal',
+    slug: 'interval',
+    title: 'Interval — Resort Exchange Platform',
+    clientName: 'Karen',
+    category: 'Travel & Booking',
+    problem: 'Needed an Interval-style resort exchange platform built from the ground up.',
+    outcome: 'Shipped a full booking platform members browse and reserve through.',
+    image: intervalImg,
+    liveUrl: 'https://interval-client.vercel.app',
+  },
+  {
+    slug: 'ihg-rewards',
+    title: 'Rewards Redemption Center',
     clientName: 'Brian Caceres',
-    category: 'Travel & Booking',
-    problem: 'Owners needed one place to browse, book, and redeem — nothing existed.',
-    outcome: 'Built the redemption portal from scratch. Owners self-serve daily.',
-    gradient: 'sunset',
-    liveUrl: 'https://rcitravelleisure.com',
-  },
-  {
-    slug: 'email-finder',
-    title: 'Email Finder Tool',
-    clientName: 'Oliver',
-    category: 'SaaS',
-    problem: 'Had a Figma design — needed it live in weeks, not months.',
-    outcome: 'Shipped a working SaaS site with pricing and lead capture.',
-    gradient: 'forest',
-    liveUrl: 'https://emailfindertool.com',
-  },
-  {
-    slug: 'ifx-payments',
-    title: 'Payments Landing Rebuild',
-    clientName: 'Rahman',
-    category: 'Fintech',
-    problem: 'Wanted a landing page that converted like the big-name payment brands.',
-    outcome: 'Delivered a clean, animated Next.js site that closes leads.',
-    gradient: 'plum',
-  },
-  {
-    slug: 'dbsee-agency',
-    title: 'DBSEE Marketing Agency',
-    clientName: 'Salman',
-    category: 'Marketing / Agency',
-    problem: 'Agency was hidden — no online presence to sell their services.',
-    outcome: '15+ pages, fully responsive, live in three weeks.',
-    gradient: 'coral',
+    category: 'Travel & Rewards',
+    problem: 'Members needed a self-serve way to redeem reward points for stays.',
+    outcome: 'Built a redemption portal — members redeem points in a few clicks.',
+    image: rewardsImg,
+    liveUrl: 'https://ihgrewards-redemption.vercel.app',
   },
 ];
 

@@ -1,17 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { FEATURED_PROJECTS } from '@/lib/portfolio-data';
+import { ProjectCard } from '@/components/site/project-card';
 
 export const metadata: Metadata = { title: 'Work' };
-
-const projects = [
-  { title: 'Platinum Club', tag: 'Travel & Booking', url: 'https://travelleisure.vip' },
-  { title: 'Travel + Leisure', tag: 'Travel & Booking', url: 'https://travelclub.it.com' },
-  { title: 'RCI', tag: 'Travel & Booking', url: 'https://rcitravelleisure.com' },
-  { title: 'IFX Payments Clone', tag: 'Fintech / Landing' },
-  { title: 'DBSEE Digital Marketing', tag: 'Marketing / Agency' },
-  { title: 'Email Finder Tool', tag: 'SaaS', url: 'https://emailfindertool.com' },
-];
 
 export default function WorkPage() {
   return (
@@ -19,27 +12,14 @@ export default function WorkPage() {
       <div className="max-w-2xl">
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">Selected work</h1>
         <p className="mt-6 text-lg text-muted">
-          A snapshot of recent projects. Full case studies coming soon — for now, browse a few
-          highlights below.
+          A snapshot of recent projects — the problem each client had, and what they got. Tap any
+          card to see it live.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((p) => (
-          <article key={p.title} className="group rounded-2xl border border-app bg-card p-6 transition-colors hover:border-strong">
-            <div className="aspect-[4/3] rounded-xl gradient-brand opacity-80" />
-            <div className="mt-5 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">{p.title}</h3>
-                <div className="text-xs text-subtle">{p.tag}</div>
-              </div>
-              {p.url ? (
-                <Button asChild variant="ghost" size="sm">
-                  <a href={p.url} target="_blank" rel="noopener noreferrer">Visit →</a>
-                </Button>
-              ) : null}
-            </div>
-          </article>
+      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURED_PROJECTS.map((p) => (
+          <ProjectCard key={p.slug} project={p} />
         ))}
       </div>
 

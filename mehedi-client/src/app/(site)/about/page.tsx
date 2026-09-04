@@ -11,10 +11,14 @@ export default function AboutPage() {
     <div className="mx-auto max-w-5xl px-4 py-16 md:px-6 md:py-24">
       {/* Heading beside a small photo — mobile & tablet only. Desktop uses
           the full sticky portrait below instead. */}
-      <div className="flex items-center gap-4 sm:gap-6 lg:hidden">
-        <h1 className="min-w-0 flex-1 text-3xl font-bold tracking-tight sm:text-4xl">
-          About Mehedi
-        </h1>
+      <div className="flex items-start gap-4 sm:gap-6 lg:hidden">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">About Mehedi</h1>
+          <p className="mt-3 text-base text-muted sm:text-lg">
+            I&apos;m a developer, but the work I do isn&apos;t about code — it&apos;s about giving my
+            clients a real advantage.
+          </p>
+        </div>
         <div className="relative w-24 shrink-0 sm:w-32">
           <div className="overflow-hidden rounded-3xl border border-app bg-card shadow-card">
             <Image
@@ -46,7 +50,7 @@ export default function AboutPage() {
         <div>
           <h1 className="hidden text-4xl font-bold tracking-tight md:text-5xl lg:block">About Mehedi</h1>
 
-          <p className="mt-4 text-lg text-muted lg:mt-6">
+          <p className="mt-4 hidden text-lg text-muted lg:mt-6 lg:block">
             I&apos;m a developer, but the work I do isn&apos;t about code — it&apos;s about giving my
             clients a real advantage. A faster site that keeps customers. A booking flow that closes
             sales while they sleep. Ads that finally bring buyers instead of just clicks.
