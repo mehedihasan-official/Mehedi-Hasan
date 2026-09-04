@@ -69,66 +69,98 @@ export default function HomePage() {
           <div className="absolute top-40 left-1/4 h-64 w-64 rounded-full bg-accent-500 blur-[140px]" />
         </div>
 
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pt-16 pb-24 md:px-6 md:pt-24 md:pb-32 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-8">
-          <div>
-            <Badge tone="brand" className="mb-6">
-              <Sparkles className="mr-1 h-3 w-3" />
-              Taking on 2 new projects this month
-            </Badge>
-            <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              Your idea, <span className="text-gradient-brand">shipped and earning</span> — without the tech headache.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg text-muted">
-              You know your business. I build the tech that grows it — websites, apps, and ads that
-              save you hours, win you customers, and let you sleep at night. No jargon. No excuses.
-              Just work that ships.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/start-project">
-                  Start your project <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="#work">See what I&apos;ve built</Link>
-              </Button>
+        <div className="relative mx-auto max-w-6xl px-4 pt-16 pb-24 md:px-6 md:pt-24 md:pb-32">
+          {/* Compact intro beside the photo — mobile & tablet only. Desktop
+              uses the full two-column hero below instead. */}
+          <div className="flex items-start gap-4 sm:gap-6 lg:hidden">
+            <div className="min-w-0 flex-1">
+              <Badge tone="brand" className="mb-4">
+                <Sparkles className="mr-1 h-3 w-3" />
+                2 new projects open
+              </Badge>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Your idea, <span className="text-gradient-brand">shipped and earning</span>.
+              </h1>
             </div>
-
-            <dl className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {[
-                { label: 'Years shipping', value: '4+' },
-                { label: 'Happy clients', value: '20+' },
-                { label: 'Countries served', value: '10+' },
-                { label: 'Come back for more', value: '85%' },
-              ].map((h) => (
-                <div key={h.label} className="rounded-2xl border border-app bg-card p-5">
-                  <dt className="text-xs uppercase tracking-wider text-subtle">{h.label}</dt>
-                  <dd className="mt-2 text-2xl font-semibold text-body">{h.value}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="relative w-28 shrink-0 sm:w-36">
+              <div className="overflow-hidden rounded-3xl border border-app bg-card shadow-card">
+                <Image
+                  src={mehediPhoto}
+                  alt="Mehedi Hasan, founder and developer"
+                  className="aspect-4/5 w-full object-cover"
+                  placeholder="blur"
+                  priority
+                  sizes="144px"
+                />
+              </div>
+              <span className="absolute -right-1 -bottom-1 flex h-4 w-4">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-4 w-4 rounded-full border-2 border-app bg-emerald-500" />
+              </span>
+            </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-            <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-linear-to-br from-brand-500/30 to-accent-500/20 blur-2xl" />
-            <div className="overflow-hidden rounded-4xl border border-app bg-card shadow-card">
-              <Image
-                src={mehediPhoto}
-                alt="Mehedi Hasan, founder and developer"
-                className="aspect-4/5 w-full object-cover"
-                placeholder="blur"
-                priority
-                sizes="(min-width: 1024px) 420px, 384px"
-              />
+          <div className="lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-8">
+            <div>
+              <Badge tone="brand" className="mb-6 hidden lg:inline-flex">
+                <Sparkles className="mr-1 h-3 w-3" />
+                Taking on 2 new projects this month
+              </Badge>
+              <h1 className="mt-6 hidden max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:mt-0 lg:block">
+                Your idea, <span className="text-gradient-brand">shipped and earning</span> — without the tech headache.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg text-muted">
+                You know your business. I build the tech that grows it — websites, apps, and ads that
+                save you hours, win you customers, and let you sleep at night. No jargon. No excuses.
+                Just work that ships.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link href="/start-project">
+                    Start your project <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="#work">See what I&apos;ve built</Link>
+                </Button>
+              </div>
+
+              <dl className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {[
+                  { label: 'Years shipping', value: '4+' },
+                  { label: 'Happy clients', value: '20+' },
+                  { label: 'Countries served', value: '10+' },
+                  { label: 'Come back for more', value: '85%' },
+                ].map((h) => (
+                  <div key={h.label} className="rounded-2xl border border-app bg-card p-5">
+                    <dt className="text-xs uppercase tracking-wider text-subtle">{h.label}</dt>
+                    <dd className="mt-2 text-2xl font-semibold text-body">{h.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-            <div className="absolute -bottom-5 left-1/2 flex w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-app bg-card/95 p-3 shadow-card backdrop-blur">
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold text-body">Mehedi Hasan</div>
-                <div className="truncate text-xs text-muted">Founder &amp; developer · Dhaka, BD</div>
+
+            <div className="relative mx-auto hidden w-full max-w-sm lg:block lg:max-w-none">
+              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-linear-to-br from-brand-500/30 to-accent-500/20 blur-2xl" />
+              <div className="overflow-hidden rounded-4xl border border-app bg-card shadow-card">
+                <Image
+                  src={mehediPhoto}
+                  alt="Mehedi Hasan, founder and developer"
+                  className="aspect-4/5 w-full object-cover"
+                  placeholder="blur"
+                  priority
+                  sizes="420px"
+                />
+              </div>
+              <div className="absolute -bottom-5 left-1/2 flex w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-app bg-card/95 p-3 shadow-card backdrop-blur">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                </span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold text-body">Mehedi Hasan</div>
+                  <div className="truncate text-xs text-muted">Founder &amp; developer · Dhaka, BD</div>
+                </div>
               </div>
             </div>
           </div>

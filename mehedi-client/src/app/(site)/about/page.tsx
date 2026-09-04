@@ -9,8 +9,28 @@ export const metadata: Metadata = { title: 'About' };
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 md:px-6 md:py-24">
-      <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-16">
-        <div className="relative mx-auto w-full max-w-xs lg:sticky lg:top-24 lg:max-w-none">
+      {/* Heading beside a small photo — mobile & tablet only. Desktop uses
+          the full sticky portrait below instead. */}
+      <div className="flex items-center gap-4 sm:gap-6 lg:hidden">
+        <h1 className="min-w-0 flex-1 text-3xl font-bold tracking-tight sm:text-4xl">
+          About Mehedi
+        </h1>
+        <div className="relative w-24 shrink-0 sm:w-32">
+          <div className="overflow-hidden rounded-3xl border border-app bg-card shadow-card">
+            <Image
+              src={mehediPhoto}
+              alt="Mehedi Hasan"
+              className="aspect-4/5 w-full object-cover"
+              placeholder="blur"
+              priority
+              sizes="128px"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-12 lg:mt-0 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-16">
+        <div className="relative mx-auto hidden w-full max-w-xs lg:block lg:sticky lg:top-24 lg:max-w-none">
           <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-linear-to-br from-brand-500/25 to-accent-500/15 blur-2xl" />
           <div className="overflow-hidden rounded-4xl border border-app bg-card shadow-card">
             <Image
@@ -18,15 +38,15 @@ export default function AboutPage() {
               alt="Mehedi Hasan"
               className="aspect-4/5 w-full object-cover"
               placeholder="blur"
-              sizes="(min-width: 1024px) 360px, 320px"
+              sizes="360px"
             />
           </div>
         </div>
 
         <div>
-          <h1 className="text-4xl font-bold tracking-tight md:text-5xl">About Mehedi</h1>
+          <h1 className="hidden text-4xl font-bold tracking-tight md:text-5xl lg:block">About Mehedi</h1>
 
-          <p className="mt-6 text-lg text-muted">
+          <p className="mt-4 text-lg text-muted lg:mt-6">
             I&apos;m a developer, but the work I do isn&apos;t about code — it&apos;s about giving my
             clients a real advantage. A faster site that keeps customers. A booking flow that closes
             sales while they sleep. Ads that finally bring buyers instead of just clicks.
