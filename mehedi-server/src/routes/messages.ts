@@ -13,7 +13,11 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     const filter =
-      req.user!.role === "admin" ? {} : { fromUserId: req.user!.id };
+      req.user!.role === "admin"
+        ? {}
+        : {
+            $or: [{ fromUserId: req.user!.id }, { toUserId: req.user!.id }],
+          };
     const messages = await MessageModel.find(filter)
       .sort({ createdAt: -1 })
       .lean();
@@ -71,16 +75,14 @@ router.get(
     ) {
       throw new HttpError(404, "Order not found");
     }
-    if (req.user!.role === "admin") {
-      await MessageModel.updateMany(
-        {
-          projectId: order._id,
-          toUserId: req.user!.id,
-          readAt: { $exists: false },
-        },
-        { $set: { readAt: new Date() } },
-      );
-    }
+    await MessageModel.updateMany(
+      {
+        projectId: order._id,
+        toUserId: req.user!.id,
+        readAt: { $exists: false },
+      },
+      { $set: { readAt: new Date() } },
+    );
     const messages = await MessageModel.find({ projectId: order._id })
       .sort({ createdAt: 1 })
       .lean();

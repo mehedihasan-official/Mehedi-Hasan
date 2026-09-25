@@ -13,19 +13,36 @@ import { useSession } from "@/hooks/use-session";
 import { apiFetch } from "@/lib/api";
 import type { Order } from "@/shared";
 import { Send } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type Message = {
   id: string;
   projectId: string;
+  fromUserId: string;
+  senderName: string;
+  projectCode: string;
+  projectService?: string | null;
   body: string;
   createdAt: string;
+  unread: boolean;
+};
+
+type ConversationSummary = {
+  projectId: string;
+  projectCode: string;
+  projectService?: string | null;
+  latestBody: string;
+  latestAt: string;
+  unread: boolean;
+  messageCount: number;
 };
 export default function MessagesPage() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [unread, setUnread] = useState(0);
   const [orderId, setOrderId] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -33,7 +50,7 @@ export default function MessagesPage() {
     if (!session?.apiToken) return;
     Promise.all([
       apiFetch<{ orders: Order[] }>("/orders", { token: session.apiToken }),
-      apiFetch<{ messages: Message[] }>("/messages", {
+      apiFetch<{ unread: number; messages: Message[] }>("/messages", {
         token: session.apiToken,
       }),
     ])
@@ -44,6 +61,7 @@ export default function MessagesPage() {
           ),
         );
         setMessages(messageResponse.messages);
+        setUnread(messageResponse.unread);
       })
       .catch((err) =>
         toast.error(
@@ -57,12 +75,19 @@ export default function MessagesPage() {
       return toast.error("Choose an active order and write a message");
     setSending(true);
     try {
-      const response = await apiFetch<{ message: Message }>("/messages", {
+      await apiFetch<{ message: Message }>("/messages", {
         method: "POST",
         body: JSON.stringify({ projectId: orderId, body }),
         token: session?.apiToken ?? null,
       });
-      setMessages([...messages, response.message]);
+      const refreshed = await apiFetch<{ unread: number; messages: Message[] }>(
+        "/messages",
+        {
+          token: session?.apiToken ?? null,
+        },
+      );
+      setMessages(refreshed.messages);
+      setUnread(refreshed.unread);
       setBody("");
       toast.success("Message sent to the admin");
     } catch (err) {
@@ -126,22 +151,43 @@ export default function MessagesPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Sent messages</CardTitle>
+          <CardTitle>Conversation history</CardTitle>
+          <CardDescription>
+            {unread} unread message{unread === 1 ? "" : "s"}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {messages.length ? (
-            messages.map((message) => (
-              <div
-                key={message.id}
-                className="rounded-xl border border-app p-4"
+            groupConversations(messages).map((conversation) => (
+              <Link
+                key={conversation.projectId}
+                href={`/dashboard/messages/${conversation.projectId}`}
+                className="block rounded-xl border border-app p-4 transition-colors hover:border-strong"
               >
-                <p className="whitespace-pre-wrap text-sm text-body">
-                  {message.body}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-body">
+                      {conversation.projectCode}
+                    </p>
+                    <p className="text-xs text-muted">
+                      {conversation.projectService?.replace("_", " ")} ·{" "}
+                      {conversation.messageCount} message
+                      {conversation.messageCount === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  {conversation.unread ? (
+                    <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      NEW
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-3 line-clamp-2 whitespace-pre-wrap text-sm text-body">
+                  {conversation.latestBody}
                 </p>
                 <p className="mt-2 text-xs text-muted">
-                  {new Date(message.createdAt).toLocaleString()}
+                  {new Date(conversation.latestAt).toLocaleString()}
                 </p>
-              </div>
+              </Link>
             ))
           ) : (
             <p className="text-sm text-muted">
@@ -152,4 +198,32 @@ export default function MessagesPage() {
       </Card>
     </div>
   );
+}
+
+function groupConversations(messages: Message[]): ConversationSummary[] {
+  const groups = new Map<string, Message[]>();
+  for (const message of messages)
+    groups.set(message.projectId, [
+      ...(groups.get(message.projectId) ?? []),
+      message,
+    ]);
+  return [...groups.values()]
+    .map((group) => {
+      const latest = [...group].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )[0];
+      return {
+        projectId: latest.projectId,
+        projectCode: latest.projectCode,
+        projectService: latest.projectService,
+        latestBody: latest.body,
+        latestAt: latest.createdAt,
+        unread: group.some((message) => message.unread),
+        messageCount: group.length,
+      };
+    })
+    .sort(
+      (a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime(),
+    );
 }

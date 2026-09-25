@@ -15,15 +15,24 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+type DashboardMessage = { unread: boolean };
+
 export default async function ClientDashboardPage() {
   const session = await getSession();
   const name = session?.user?.name?.split(" ")[0] ?? "there";
 
-  const { data } = await apiFetchSafe<{ orders: Order[] }>(
-    "/orders",
-    { orders: [] },
-    { server: true, token: session?.apiToken },
-  );
+  const [{ data }, { data: messageData }] = await Promise.all([
+    apiFetchSafe<{ orders: Order[] }>(
+      "/orders",
+      { orders: [] },
+      { server: true, token: session?.apiToken },
+    ),
+    apiFetchSafe<{ unread: number; messages: DashboardMessage[] }>(
+      "/messages",
+      { unread: 0, messages: [] },
+      { server: true, token: session?.apiToken },
+    ),
+  ]);
   const activeOrders = data.orders.filter(
     (o) => !["delivered", "cancelled"].includes(o.status),
   ).length;
@@ -92,7 +101,11 @@ export default async function ClientDashboardPage() {
             href: "/dashboard/orders",
           },
           { k: "Next milestone", v: "—" },
-          { k: "Unread messages", v: "—" },
+          {
+            k: "Unread messages",
+            v: String(messageData.unread),
+            href: "/dashboard/messages",
+          },
           { k: "Open invoices", v: "—" },
         ].map((item) => (
           <Link
