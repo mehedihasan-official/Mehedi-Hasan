@@ -18,12 +18,24 @@ export const dynamic = "force-dynamic";
 type AdminMessage = {
   id: string;
   projectId: string;
+  fromUserId: string;
   senderName: string;
   projectCode: string;
   projectService?: string | null;
   body: string;
   createdAt: string;
   unread: boolean;
+};
+
+type ConversationSummary = {
+  projectId: string;
+  projectCode: string;
+  projectService?: string | null;
+  senderName: string;
+  latestBody: string;
+  latestAt: string;
+  unread: boolean;
+  messageCount: number;
 };
 
 export default async function AdminMessagesPage() {
@@ -36,8 +48,9 @@ export default async function AdminMessagesPage() {
     { unread: 0, messages: [] },
     { server: true, token: session?.apiToken },
   );
-  const unread = data.messages.filter((message) => message.unread);
-  const read = data.messages.filter((message) => !message.unread);
+  const conversations = groupConversations(data.messages, session?.user.id);
+  const unread = conversations.filter((conversation) => conversation.unread);
+  const read = conversations.filter((conversation) => !conversation.unread);
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -64,8 +77,8 @@ export default async function AdminMessagesPage() {
         />
       ) : (
         <div className="space-y-8">
-          <MessageSection title="Unread" messages={unread} />
-          <MessageSection title="Read history" messages={read} />
+          <MessageSection title="Unread" conversations={unread} />
+          <MessageSection title="Read history" conversations={read} />
         </div>
       )}
     </div>
@@ -74,10 +87,10 @@ export default async function AdminMessagesPage() {
 
 function MessageSection({
   title,
-  messages,
+  conversations,
 }: {
   title: string;
-  messages: AdminMessage[];
+  conversations: ConversationSummary[];
 }) {
   return (
     <section className="space-y-3">
@@ -89,12 +102,12 @@ function MessageSection({
             : "Previously opened client messages."}
         </p>
       </div>
-      {messages.length ? (
+      {conversations.length ? (
         <div className="grid gap-3">
-          {messages.map((message) => (
+          {conversations.map((conversation) => (
             <Link
-              key={message.id}
-              href={`/admin/messages/${message.projectId}`}
+              key={conversation.projectId}
+              href={`/admin/messages/${conversation.projectId}`}
             >
               <Card className="transition-colors hover:border-strong">
                 <CardHeader className="pb-3">
@@ -102,17 +115,22 @@ function MessageSection({
                     <div className="min-w-0">
                       <CardTitle className="flex items-center gap-2 text-base">
                         <MessageCircle className="h-4 w-4 text-brand-400" />
-                        {message.senderName}
+                        {conversation.senderName}
                       </CardTitle>
                       <CardDescription>
-                        {message.projectCode}
-                        {message.projectService
-                          ? ` · ${message.projectService.replace("_", " ")}`
+                        {conversation.projectCode} · ID:{" "}
+                        {conversation.projectId}
+                        {conversation.projectService
+                          ? ` · ${conversation.projectService.replace("_", " ")}`
                           : ""}{" "}
-                        · {formatDate(message.createdAt)}
+                        · {formatDate(conversation.latestAt)} ·{" "}
+                        {conversation.messageCount}{" "}
+                        {conversation.messageCount === 1
+                          ? "message"
+                          : "messages"}
                       </CardDescription>
                     </div>
-                    {message.unread ? (
+                    {conversation.unread ? (
                       <Badge tone="warning">Unread</Badge>
                     ) : (
                       <Badge>Read</Badge>
@@ -121,7 +139,7 @@ function MessageSection({
                 </CardHeader>
                 <CardContent>
                   <p className="line-clamp-2 text-sm text-body">
-                    {message.body}
+                    {conversation.latestBody}
                   </p>
                 </CardContent>
               </Card>
@@ -135,4 +153,43 @@ function MessageSection({
       )}
     </section>
   );
+}
+
+function groupConversations(
+  messages: AdminMessage[],
+  adminId?: string,
+): ConversationSummary[] {
+  const groups = new Map<string, AdminMessage[]>();
+
+  for (const message of messages) {
+    const group = groups.get(message.projectId) ?? [];
+    group.push(message);
+    groups.set(message.projectId, group);
+  }
+
+  return [...groups.values()]
+    .map((group) => {
+      const latest = [...group].sort(
+        (left, right) =>
+          new Date(right.createdAt).getTime() -
+          new Date(left.createdAt).getTime(),
+      )[0];
+      const clientMessage =
+        group.find((message) => message.fromUserId !== adminId) ?? latest;
+
+      return {
+        projectId: latest.projectId,
+        projectCode: latest.projectCode,
+        projectService: latest.projectService,
+        senderName: clientMessage.senderName,
+        latestBody: latest.body,
+        latestAt: latest.createdAt,
+        unread: group.some((message) => message.unread),
+        messageCount: group.length,
+      };
+    })
+    .sort(
+      (left, right) =>
+        new Date(right.latestAt).getTime() - new Date(left.latestAt).getTime(),
+    );
 }

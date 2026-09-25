@@ -8,12 +8,14 @@ import {
   FolderKanban,
   Inbox,
   LayoutDashboard,
+  Menu,
   MessageCircle,
   Package,
   Receipt,
   Settings,
   UserCircle,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -62,20 +64,41 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               size="sm"
               variant="outline"
               onClick={() => setOpen((v) => !v)}
+              aria-label="Toggle admin menu"
             >
-              Menu
+              <Menu className="h-4 w-4" />
             </Button>
           </div>
         </header>
 
         {open ? (
-          <div className="border-b border-app bg-elev md:hidden">
-            <SidebarNav isActive={isActive} onClick={() => setOpen(false)} />
-            <div className="p-3">
-              <SidebarLogout inline />
-            </div>
-          </div>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setOpen(false)}
+          />
         ) : null}
+        <aside
+          className={cn(
+            "fixed inset-y-0 right-0 z-50 flex w-72 flex-col border-l border-app bg-elev shadow-2xl transition-transform duration-200 md:hidden",
+            open ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          <div className="flex h-14 items-center justify-between border-b border-app px-4 font-semibold">
+            Admin
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              aria-label="Close admin menu"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <SidebarNav isActive={isActive} onClick={() => setOpen(false)} />
+          <div className="p-3">
+            <SidebarLogout inline />
+          </div>
+        </aside>
 
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
