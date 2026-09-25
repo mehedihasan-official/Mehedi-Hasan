@@ -1,23 +1,34 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, FolderKanban, Inbox, Package, Receipt, Settings } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { SignOutButton } from '@/components/auth/sign-out-button';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  FolderKanban,
+  Inbox,
+  LayoutDashboard,
+  MessageCircle,
+  Package,
+  Receipt,
+  Settings,
+  UserCircle,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const nav = [
-  { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/admin/briefs', label: 'Briefs', icon: Inbox },
-  { href: '/admin/users', label: 'Users', icon: UserCircle },
-  { href: '/admin/clients', label: 'Clients', icon: Users },
-  { href: '/admin/orders', label: 'Orders', icon: Package },
-  { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/admin/invoices', label: 'Invoices', icon: Receipt },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/admin/briefs", label: "Briefs", icon: Inbox },
+  { href: "/admin/users", label: "Users", icon: UserCircle },
+  { href: "/admin/clients", label: "Clients", icon: Users },
+  { href: "/admin/orders", label: "Orders", icon: Package },
+  { href: "/admin/messages", label: "Messages", icon: MessageCircle },
+  { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+  { href: "/admin/invoices", label: "Invoices", icon: Receipt },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -25,7 +36,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
+    exact
+      ? pathname === href
+      : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
@@ -38,12 +51,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-app bg-app/80 px-4 backdrop-blur-xl md:hidden">
           <Link href="/admin" className="flex items-center gap-2 font-semibold">
-            <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">M</span>
+            <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">
+              M
+            </span>
             Admin
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button size="sm" variant="outline" onClick={() => setOpen((v) => !v)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpen((v) => !v)}
+            >
               Menu
             </Button>
           </div>
@@ -66,8 +85,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
 function SidebarBrand() {
   return (
-    <Link href="/admin" className="flex h-16 items-center gap-2 border-b border-app px-5 font-semibold">
-      <span className="grid h-8 w-8 place-items-center rounded-lg gradient-brand text-sm font-bold text-white">M</span>
+    <Link
+      href="/admin"
+      className="flex h-16 items-center gap-2 border-b border-app px-5 font-semibold"
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-lg gradient-brand text-sm font-bold text-white">
+        M
+      </span>
       Admin
     </Link>
   );
@@ -90,8 +114,10 @@ function SidebarNav({
             href={n.href}
             onClick={onClick}
             className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-              active ? 'bg-card text-body shadow-card' : 'text-muted hover:bg-card hover:text-body',
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              active
+                ? "bg-card text-body shadow-card"
+                : "text-muted hover:bg-card hover:text-body",
             )}
           >
             <n.icon className="h-4 w-4" />
@@ -105,7 +131,7 @@ function SidebarNav({
 
 function SidebarLogout({ inline }: { inline?: boolean } = {}) {
   return (
-    <div className={cn('flex items-center gap-2', inline ? '' : 'p-3')}>
+    <div className={cn("flex items-center gap-2", inline ? "" : "p-3")}>
       <SignOutButton className="flex-1" />
       {!inline ? <ThemeToggle /> : null}
     </div>
