@@ -1,32 +1,32 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
   Inbox,
-  Package,
-  FolderKanban,
-  MessageCircle,
-  Receipt,
-  UserCircle,
+  LayoutDashboard,
   Menu,
+  MessageCircle,
+  Package,
+  Receipt,
+  Settings,
+  UserCircle,
   X,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { SignOutButton } from '@/components/auth/sign-out-button';
-import { ThemeToggle } from '@/components/theme-toggle';
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const nav = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/briefs', label: 'Briefs', icon: Inbox },
-  { href: '/dashboard/orders', label: 'Orders', icon: Package },
-  { href: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
-  { href: '/dashboard/messages', label: 'Messages', icon: MessageCircle },
-  { href: '/dashboard/invoices', label: 'Invoices', icon: Receipt },
-  { href: '/dashboard/profile', label: 'Profile', icon: UserCircle },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/briefs", label: "Briefs", icon: Inbox },
+  { href: "/dashboard/orders", label: "Orders", icon: Package },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
+  { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+  { href: "/dashboard/profile", label: "Profile", icon: UserCircle },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
+    exact
+      ? pathname === href
+      : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
@@ -47,25 +49,52 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-app bg-app/80 px-4 backdrop-blur-xl md:hidden">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">M</span>
+            <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">
+              M
+            </span>
             Dashboard
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button size="sm" variant="outline" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Toggle menu"
+            >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
           </div>
         </header>
 
         {open ? (
-          <div className="border-b border-app bg-elev md:hidden">
-            <SidebarNav isActive={isActive} onClick={() => setOpen(false)} />
-            <div className="p-3">
-              <SignOutButton />
-            </div>
-          </div>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setOpen(false)}
+          />
         ) : null}
+        <aside
+          className={cn(
+            "fixed inset-y-0 right-0 z-50 flex w-72 flex-col border-l border-app bg-elev shadow-2xl transition-transform duration-200 md:hidden",
+            open ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          <div className="flex h-14 items-center justify-between border-b border-app px-4 font-semibold">
+            Dashboard{" "}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <SidebarNav isActive={isActive} onClick={() => setOpen(false)} />
+          <div className="p-3">
+            <SignOutButton />
+          </div>
+        </aside>
 
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
@@ -75,8 +104,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
 function Brand() {
   return (
-    <Link href="/" className="flex h-16 items-center gap-2 border-b border-app px-5 font-semibold">
-      <span className="grid h-8 w-8 place-items-center rounded-lg gradient-brand text-sm font-bold text-white">M</span>
+    <Link
+      href="/"
+      className="flex h-16 items-center gap-2 border-b border-app px-5 font-semibold"
+    >
+      <span className="grid h-8 w-8 place-items-center rounded-lg gradient-brand text-sm font-bold text-white">
+        M
+      </span>
       Dashboard
     </Link>
   );
@@ -99,8 +133,10 @@ function SidebarNav({
             href={n.href}
             onClick={onClick}
             className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-              active ? 'bg-card text-body shadow-card' : 'text-muted hover:bg-card hover:text-body',
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              active
+                ? "bg-card text-body shadow-card"
+                : "text-muted hover:bg-card hover:text-body",
             )}
           >
             <n.icon className="h-4 w-4" />
