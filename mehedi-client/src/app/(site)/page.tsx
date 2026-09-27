@@ -7,34 +7,13 @@ import { FEATURED_PROJECTS, TESTIMONIALS } from "@/lib/portfolio-data";
 import {
   ArrowRight,
   Clock,
-  Handshake,
   MessageCircle,
-  Rocket,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-const outcomes = [
-  {
-    icon: TrendingUp,
-    title: "Websites that grow your revenue",
-    desc: "Landing pages, storefronts, and SaaS that turn visitors into customers — not just look pretty.",
-  },
-  {
-    icon: Rocket,
-    title: "Apps your customers actually use",
-    desc: "iOS + Android from one codebase. Push notifications, payments, everything ready.",
-  },
-  {
-    icon: Handshake,
-    title: "Ads that bring real buyers",
-    desc: "Meta ads set up, tested, and optimized so you're not lighting money on fire.",
-  },
-];
 
 const whyMe = [
   {
@@ -56,6 +35,34 @@ const whyMe = [
     icon: Wallet,
     title: "Fair, upfront pricing",
     desc: "No hidden costs. You know the price before we start. Payoneer or bKash — your call.",
+  },
+];
+
+const questions = [
+  {
+    question: "How much will my project cost?",
+    answer:
+      "It depends on what you need. We’ll first discuss your goals and scope, then agree on a clear price before any work begins. There are no fixed packages to choose from.",
+  },
+  {
+    question: "How do we get started?",
+    answer:
+      "Place an order with the project details you already know. We can clarify the scope, priorities, and next steps together after that.",
+  },
+  {
+    question: "Can we work together from different countries?",
+    answer:
+      "Yes. Projects are managed remotely with written updates and calls scheduled across time zones. You’ll communicate directly with me throughout the work.",
+  },
+  {
+    question: "How long does a project take?",
+    answer:
+      "Timing depends on the scope and feedback schedule. We’ll set a realistic timeline after discussing the requirements, and milestone-based work can break delivery into clear stages.",
+  },
+  {
+    question: "Who owns the work when it’s finished?",
+    answer:
+      "Ownership, handover, and any ongoing support are agreed as part of the project scope before work starts, so expectations are clear on both sides.",
   },
 ];
 
@@ -136,9 +143,9 @@ export default function HomePage() {
 
               <dl className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                  { label: "Years shipping", value: "4+" },
-                  { label: "Happy clients", value: "20+" },
-                  { label: "Countries served", value: "10+" },
+                  { label: "Years shipping", value: "5+" },
+                  { label: "Happy clients", value: "210+" },
+                  { label: "Countries served", value: "20+" },
                   { label: "Come back for more", value: "85%" },
                 ].map((h) => (
                   <div
@@ -184,34 +191,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ---------------- Outcomes ---------------- */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            What I actually deliver
-          </h2>
-          <p className="mt-2 text-muted">
-            Not a list of technologies. A list of results. You bring the goal —
-            I bring the execution.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {outcomes.map((o) => (
-            <div
-              key={o.title}
-              className="group rounded-2xl border border-app bg-card p-6 transition-colors hover:border-strong"
-            >
-              <div className="grid h-11 w-11 place-items-center rounded-xl gradient-brand text-white">
-                <o.icon className="h-5 w-5" />
-              </div>
-              <h3 className="mt-5 text-lg font-semibold">{o.title}</h3>
-              <p className="mt-2 text-sm text-muted">{o.desc}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -309,6 +288,33 @@ export default function HomePage() {
               </Button>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16 md:px-6">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold text-brand-400">Good to know</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            Questions clients often ask
+          </h2>
+        </div>
+        <div className="mt-6 divide-y divide-app border-y border-app">
+          {questions.map((item) => (
+            <details key={item.question} className="group py-4">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-medium text-body [&::-webkit-details-marker]:hidden">
+                <span>{item.question}</span>
+                <span
+                  className="shrink-0 text-xl text-muted transition-transform group-open:rotate-45"
+                  aria-hidden="true"
+                >
+                  +
+                </span>
+              </summary>
+              <p className="max-w-3xl pb-2 pr-8 pt-2 text-sm leading-6 text-muted">
+                {item.answer}
+              </p>
+            </details>
+          ))}
         </div>
       </section>
     </>

@@ -6,10 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { apiFetchSafe } from "@/lib/api";
 import { getSession } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
-import type { Order } from "@/shared";
+import type { Invoice, Order } from "@/shared";
 import { ArrowRight, MessageCircle, Package } from "lucide-react";
 import Link from "next/link";
 
@@ -21,21 +22,24 @@ export default async function ClientDashboardPage() {
   const session = await getSession();
   const name = session?.user?.name?.split(" ")[0] ?? "there";
 
-  const [{ data }, { data: messageData }] = await Promise.all([
-    apiFetchSafe<{ orders: Order[] }>(
-      "/orders",
-      { orders: [] },
-      { server: true, token: session?.apiToken },
-    ),
-    apiFetchSafe<{ unread: number; messages: DashboardMessage[] }>(
-      "/messages",
-      { unread: 0, messages: [] },
-      { server: true, token: session?.apiToken },
-    ),
-  ]);
-  const activeOrders = data.orders.filter(
-    (o) => !["delivered", "cancelled"].includes(o.status),
-  ).length;
+  const [{ data }, { data: messageData }, { data: invoiceData }] =
+    await Promise.all([
+      apiFetchSafe<{ orders: Order[] }>(
+        "/orders?limit=100",
+        { orders: [] },
+        { server: true, token: session?.apiToken },
+      ),
+      apiFetchSafe<{ unread: number; messages: DashboardMessage[] }>(
+        "/messages",
+        { unread: 0, messages: [] },
+        { server: true, token: session?.apiToken },
+      ),
+      apiFetchSafe<{ invoices: Invoice[] }>(
+        "/invoices",
+        { invoices: [] },
+        { server: true, token: session?.apiToken },
+      ),
+    ]);
   const active = data.orders.filter(
     (o) => !["delivered", "cancelled"].includes(o.status),
   );
@@ -50,15 +54,24 @@ export default async function ClientDashboardPage() {
         : status === "in_progress"
           ? "warning"
           : "brand";
+  const openInvoices = invoiceData.invoices.filter(
+    (invoice) => invoice.status !== "paid",
+  );
+  const averageProgress = active.length
+    ? Math.round(
+        active.reduce((total, order) => total + order.progress, 0) /
+          active.length,
+      )
+    : 0;
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, {name} 👋
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          Welcome back, {name}
         </h1>
-        <p className="mt-2 text-muted">
-          Here&apos;s a snapshot of your active work.
+        <p className="mt-2 text-sm text-muted sm:text-base">
+          Your projects, messages, and invoices in one place.
         </p>
       </div>
 
@@ -93,34 +106,36 @@ export default async function ClientDashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {[
           {
             k: "Active orders",
-            v: String(activeOrders),
+            v: String(active.length),
             href: "/dashboard/orders",
           },
-          { k: "Next milestone", v: "—" },
+          {
+            k: "Completed",
+            v: String(history.length),
+            href: "/dashboard/orders",
+          },
           {
             k: "Unread messages",
             v: String(messageData.unread),
             href: "/dashboard/messages",
           },
-          { k: "Open invoices", v: "—" },
+          {
+            k: "Open invoices",
+            v: String(openInvoices.length),
+            href: "/dashboard/invoices",
+          },
         ].map((item) => (
-          <Link
-            key={item.k}
-            href={item.href ?? "#"}
-            className={item.href ? "block" : "pointer-events-none"}
-          >
-            <Card
-              className={
-                item.href ? "transition-colors hover:border-strong" : undefined
-              }
-            >
-              <CardHeader>
-                <CardDescription>{item.k}</CardDescription>
-                <CardTitle className="text-3xl">{item.v}</CardTitle>
+          <Link key={item.k} href={item.href ?? "#"} className="block min-w-0">
+            <Card className="h-full transition-colors hover:border-strong">
+              <CardHeader className="p-4 sm:p-6">
+                <CardDescription className="text-xs sm:text-sm">
+                  {item.k}
+                </CardDescription>
+                <CardTitle className="text-2xl sm:text-3xl">{item.v}</CardTitle>
               </CardHeader>
             </Card>
           </Link>
@@ -128,28 +143,47 @@ export default async function ClientDashboardPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Active work</CardTitle>
-          <CardDescription>
-            Current orders and their latest status.
-          </CardDescription>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 p-4 sm:p-6">
+          <div>
+            <CardTitle>Project progress</CardTitle>
+            <CardDescription>
+              Average completion across {active.length} active{" "}
+              {active.length === 1 ? "order" : "orders"}.
+            </CardDescription>
+          </div>
+          <Link
+            href="/dashboard/orders"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-brand-400"
+          >
+            View all <ArrowRight className="h-4 w-4" />
+          </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+          <div className="flex items-center gap-3">
+            <ProgressBar value={averageProgress} />
+            <span className="w-10 shrink-0 text-right text-sm font-semibold">
+              {averageProgress}%
+            </span>
+          </div>
           {active.length ? (
-            <div className="space-y-3">
-              {active.map((order) => (
+            <div className="divide-y divide-app">
+              {active.slice(0, 4).map((order) => (
                 <OrderRow
                   key={order.id}
                   order={order}
                   tone={tone(order.status)}
+                  showProgress
                 />
               ))}
             </div>
           ) : (
-            <EmptyList text="No active orders yet." />
+            <div className="rounded-lg border border-dashed border-app p-4 text-sm text-muted">
+              Place an order to see its status and progress here.
+            </div>
           )}
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Completed history</CardTitle>
@@ -180,25 +214,35 @@ export default async function ClientDashboardPage() {
 function OrderRow({
   order,
   tone,
+  showProgress = false,
 }: {
   order: Order;
   tone: "brand" | "success" | "warning" | "danger";
+  showProgress?: boolean;
 }) {
   return (
     <Link
       href={`/dashboard/orders/${order.id}`}
-      className="flex items-center justify-between gap-4 rounded-xl border border-app p-4 transition-colors hover:border-strong"
+      className="flex min-w-0 items-center justify-between gap-3 py-4 transition-colors hover:text-brand-400"
     >
-      <div className="min-w-0">
-        <p className="truncate font-mono text-sm font-semibold text-body">
-          {order.orderCode}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate font-mono text-sm font-semibold text-body">
+            {order.orderCode}
+          </p>
+          <Badge tone={tone}>{order.status.replace("_", " ")}</Badge>
+        </div>
+        <p className="mt-1 truncate text-xs capitalize text-muted">
+          {order.serviceType.replaceAll("_", " ")} ·{" "}
+          {formatDate(order.createdAt)}
         </p>
-        <p className="mt-1 text-xs text-muted">
-          {order.serviceType.replace("_", " ")} · {formatDate(order.createdAt)}
-        </p>
+        {showProgress ? (
+          <div className="mt-3">
+            <ProgressBar value={order.progress} />
+          </div>
+        ) : null}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Badge tone={tone}>{order.status.replace("_", " ")}</Badge>
         <ArrowRight className="h-4 w-4 text-muted" />
       </div>
     </Link>

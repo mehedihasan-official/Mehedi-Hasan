@@ -1,10 +1,11 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import mehediPhoto from '@/assets/images/mehedi-hasan.jpg';
+import mehediPhoto from "@/assets/images/mehedi-hasan.jpg";
+import { DeliverablesSection } from "@/components/site/deliverables-section";
+import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
-export const metadata: Metadata = { title: 'About' };
+export const metadata: Metadata = { title: "About" };
 
 export default function AboutPage() {
   return (
@@ -13,10 +14,12 @@ export default function AboutPage() {
           the full sticky portrait below instead. */}
       <div className="flex items-start gap-4 sm:gap-6 lg:hidden">
         <div className="min-w-0 flex-1">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">About Mehedi</h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            About Mehedi
+          </h1>
           <p className="mt-3 text-base text-muted sm:text-lg">
-            I&apos;m a developer, but the work I do isn&apos;t about code — it&apos;s about giving my
-            clients a real advantage.
+            I&apos;m a developer, but the work I do isn&apos;t about code —
+            it&apos;s about giving my clients a real advantage.
           </p>
         </div>
         <div className="relative w-24 shrink-0 sm:w-32">
@@ -48,35 +51,46 @@ export default function AboutPage() {
         </div>
 
         <div>
-          <h1 className="hidden text-4xl font-bold tracking-tight md:text-5xl lg:block">About Mehedi</h1>
+          <h1 className="hidden text-4xl font-bold tracking-tight md:text-5xl lg:block">
+            About Mehedi
+          </h1>
 
           <p className="mt-4 hidden text-lg text-muted lg:mt-6 lg:block">
-            I&apos;m a developer, but the work I do isn&apos;t about code — it&apos;s about giving my
-            clients a real advantage. A faster site that keeps customers. A booking flow that closes
-            sales while they sleep. Ads that finally bring buyers instead of just clicks.
+            I&apos;m a developer, but the work I do isn&apos;t about code —
+            it&apos;s about giving my clients a real advantage. A faster site
+            that keeps customers. A booking flow that closes sales while they
+            sleep. Ads that finally bring buyers instead of just clicks.
           </p>
           <p className="mt-4 text-lg text-muted">
-            For the last four years I&apos;ve built SaaS platforms, travel and booking systems,
-            e-commerce sites, and internal tools for founders, agencies, and small businesses across
-            the US, Europe, and the Middle East. My favorite part is the first call — when someone
-            explains what they&apos;re trying to grow, and we figure out together how to actually get
-            there.
+            Over five years, I&apos;ve helped founders, agencies, and growing
+            businesses across the US, Europe, the Middle East, and other markets
+            build SaaS platforms, travel and booking systems, e-commerce
+            experiences, and internal tools. I work directly with each client,
+            learning how their business operates before recommending a practical
+            solution.
           </p>
           <p className="mt-4 text-lg text-muted">
-            Based in Dhaka, working worldwide. Direct, honest, and easy to talk to.
+            Collaboration is remote-first: clear written updates, scheduled
+            calls across time zones, and direct communication from the first
+            conversation through handover.
           </p>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
             {[
-              { k: 'Based in', v: 'Mirpur, Dhaka, Bangladesh' },
-              { k: 'Timezone', v: 'GMT+6 (Asia/Dhaka)' },
-              { k: 'Availability', v: 'Open for 2 new projects' },
-              { k: 'Payment', v: 'Payoneer (USD) · bKash (BDT)' },
-              { k: 'Experience', v: '4+ years shipping' },
-              { k: 'Repeat clients', v: '85% come back' },
+              { k: "Clients", v: "Founders and teams worldwide" },
+              { k: "Collaboration", v: "Remote-first, direct communication" },
+              { k: "Experience", v: "5+ years shipping" },
+              { k: "Clients served", v: "210+" },
+              { k: "Countries served", v: "20+" },
+              { k: "Repeat clients", v: "85% come back" },
             ].map((r) => (
-              <div key={r.k} className="rounded-xl border border-app bg-card p-5">
-                <div className="text-xs uppercase tracking-wider text-subtle">{r.k}</div>
+              <div
+                key={r.k}
+                className="rounded-xl border border-app bg-card p-5"
+              >
+                <div className="text-xs uppercase tracking-wider text-subtle">
+                  {r.k}
+                </div>
                 <div className="mt-2 text-body">{r.v}</div>
               </div>
             ))}
@@ -84,11 +98,14 @@ export default function AboutPage() {
 
           <div className="mt-10">
             <Button asChild size="lg">
-              <Link href="/start-project">Tell me about your project →</Link>
+              <Link href="/dashboard/orders/new">
+                Tell me about your project →
+              </Link>
             </Button>
           </div>
         </div>
       </div>
+      <DeliverablesSection />
     </div>
   );
 }

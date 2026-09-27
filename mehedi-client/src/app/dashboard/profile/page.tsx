@@ -1,10 +1,10 @@
-import { getSession } from '@/lib/session';
-import { apiFetchSafe } from '@/lib/api';
-import { EmptyState } from '@/components/ui/empty-state';
-import type { Client } from '@/shared';
-import { ProfileForm } from './profile-form';
+import { EmptyState } from "@/components/ui/empty-state";
+import { apiFetchSafe } from "@/lib/api";
+import { getSession } from "@/lib/session";
+import type { Client } from "@/shared";
+import { ProfileOverview } from "./profile-form";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function ProfilePage({
   searchParams,
@@ -14,7 +14,7 @@ export default async function ProfilePage({
   const { welcome } = await searchParams;
   const session = await getSession();
   const { data, error } = await apiFetchSafe<{ profile: Client | null }>(
-    '/me',
+    "/me",
     { profile: null },
     { server: true, token: session?.apiToken },
   );
@@ -27,9 +27,13 @@ export default async function ProfilePage({
       </div>
 
       {error || !data.profile ? (
-        <EmptyState tone="warning" title="Can't load your profile" description={error ?? undefined} />
+        <EmptyState
+          tone="warning"
+          title="Can't load your profile"
+          description={error ?? undefined}
+        />
       ) : (
-        <ProfileForm profile={data.profile} showWelcome={welcome === '1'} />
+        <ProfileOverview profile={data.profile} showWelcome={welcome === "1"} />
       )}
     </div>
   );

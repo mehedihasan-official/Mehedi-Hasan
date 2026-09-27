@@ -23,6 +23,7 @@ router.post(
       clientId: req.user!.id,
       orderCode,
     });
+    await ensureOrderInvoice(order);
 
     // Placing an order is what turns a plain registered "user" into a client.
     if (req.user!.role === "user") {
@@ -130,39 +131,61 @@ router.patch(
       { new: true },
     );
     if (!updated) throw new HttpError(404, "Order not found");
-    if (updated.status === "accepted" || updated.status === "in_progress") {
+    let invoice = await InvoiceModel.findOne({ orderId: updated._id });
+    if (
+      !invoice &&
+      (updated.status === "accepted" || updated.status === "in_progress")
+    ) {
+      invoice = await ensureOrderInvoice(updated);
+    }
+    if (invoice?.status === "draft" && input.budgetAmount !== undefined) {
       const amount = updated.budgetAmount ?? 0;
-      const service = String(updated.serviceType).replaceAll("_", " ");
-      await InvoiceModel.findOneAndUpdate(
-        { orderId: updated._id },
+      await InvoiceModel.updateOne(
+        { _id: invoice._id, status: "draft" },
         {
-          $setOnInsert: {
-            number: `INV-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
-            projectId: updated._id,
-            orderId: updated._id,
-            clientId: updated.clientId,
-            items: [
-              { description: `${service} project`, quantity: 1, rate: amount },
-            ],
+          $set: {
             amount,
-            currency: "USD",
-            status: "draft",
+            "items.0.rate": amount,
             notes: amount
               ? null
               : "Set the agreed project price before sending this invoice.",
           },
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
       );
-      if (input.budgetAmount !== undefined) {
-        await InvoiceModel.updateOne(
-          { orderId: updated._id, status: "draft" },
-          { $set: { amount, "items.0.rate": amount } },
-        );
-      }
     }
     res.json({ order: toOrder(updated as never) });
   }),
 );
+
+async function ensureOrderInvoice(order: {
+  _id: unknown;
+  budgetAmount?: number | null;
+  serviceType: string;
+  clientId: unknown;
+}) {
+  const amount = order.budgetAmount ?? 0;
+  const service = String(order.serviceType).replaceAll("_", " ");
+  return InvoiceModel.findOneAndUpdate(
+    { orderId: order._id },
+    {
+      $setOnInsert: {
+        number: `INV-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
+        projectId: order._id,
+        orderId: order._id,
+        clientId: order.clientId,
+        items: [
+          { description: `${service} project`, quantity: 1, rate: amount },
+        ],
+        amount,
+        currency: "USD",
+        status: "draft",
+        notes: amount
+          ? null
+          : "Set the agreed project price before sending this invoice.",
+      },
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true },
+  );
+}
 
 export default router;
