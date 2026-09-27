@@ -1,4 +1,4 @@
-import { Schema, Types, model, type InferSchemaType } from 'mongoose';
+import { Schema, Types, model, type InferSchemaType } from "mongoose";
 
 const invoiceItemSchema = new Schema(
   {
@@ -12,12 +12,29 @@ const invoiceItemSchema = new Schema(
 const invoiceSchema = new Schema(
   {
     number: { type: String, required: true, unique: true, index: true },
-    projectId: { type: Types.ObjectId, ref: 'Project', required: true, index: true },
-    clientId: { type: Types.ObjectId, ref: 'User', required: true, index: true },
+    projectId: {
+      type: Types.ObjectId,
+      ref: "Project",
+      required: true,
+      index: true,
+    },
+    orderId: {
+      type: Types.ObjectId,
+      ref: "Order",
+      unique: true,
+      sparse: true,
+      index: true,
+    },
+    clientId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     items: { type: [invoiceItemSchema], required: true, default: [] },
     amount: { type: Number, required: true },
-    currency: { type: String, default: 'USD' },
-    status: { type: String, default: 'draft', index: true },
+    currency: { type: String, default: "USD" },
+    status: { type: String, default: "draft", index: true },
     dueDate: Date,
     sentAt: Date,
     paidAt: Date,
@@ -26,5 +43,7 @@ const invoiceSchema = new Schema(
   { timestamps: true },
 );
 
-export type InvoiceDoc = InferSchemaType<typeof invoiceSchema> & { _id: unknown };
-export const InvoiceModel = model('Invoice', invoiceSchema);
+export type InvoiceDoc = InferSchemaType<typeof invoiceSchema> & {
+  _id: unknown;
+};
+export const InvoiceModel = model("Invoice", invoiceSchema);

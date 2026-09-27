@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { ORDER_STATUSES, orderUpdateSchema, type Order, type OrderUpdateInput } from '@/shared';
-import { Button } from '@/components/ui/button';
-import { Input, Label, Textarea } from '@/components/ui/input';
-import { ProgressBar } from '@/components/ui/progress-bar';
-import { apiFetch } from '@/lib/api';
-import { useSession } from '@/hooks/use-session';
+import { Button } from "@/components/ui/button";
+import { Input, Label, Textarea } from "@/components/ui/input";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { useSession } from "@/hooks/use-session";
+import { apiFetch } from "@/lib/api";
+import {
+  ORDER_STATUSES,
+  orderUpdateSchema,
+  type Order,
+  type OrderUpdateInput,
+} from "@/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function OrderEditForm({ order }: { order: Order }) {
   const router = useRouter();
@@ -25,24 +30,28 @@ export function OrderEditForm({ order }: { order: Order }) {
     defaultValues: {
       status: order.status,
       progress: order.progress,
-      projectUrl: order.projectUrl ?? '',
-      notes: order.notes ?? '',
+      budgetAmount: order.budgetAmount ?? null,
+      projectUrl: order.projectUrl ?? "",
+      notes: order.notes ?? "",
     },
   });
 
-  const progress = watch('progress') ?? order.progress;
+  const progress = watch("progress") ?? order.progress;
 
   async function onSubmit(values: OrderUpdateInput) {
     try {
       await apiFetch(`/orders/${order.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ ...values, projectUrl: values.projectUrl || null }),
+        method: "PATCH",
+        body: JSON.stringify({
+          ...values,
+          projectUrl: values.projectUrl || null,
+        }),
         token: session?.apiToken ?? null,
       });
-      toast.success('Order updated');
+      toast.success("Order updated");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Update failed');
+      toast.error(err instanceof Error ? err.message : "Update failed");
     }
   }
 
@@ -53,36 +62,61 @@ export function OrderEditForm({ order }: { order: Order }) {
           <Label>Status</Label>
           <select
             className="flex h-10 w-full rounded-lg border border-app bg-elev px-3 text-sm text-body focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
-            {...register('status')}
+            {...register("status")}
           >
             {ORDER_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s.replace('_', ' ')}
+                {s.replace("_", " ")}
               </option>
             ))}
           </select>
         </div>
         <div className="space-y-2">
           <Label>Progress ({progress}%)</Label>
-          <Input type="number" min={0} max={100} {...register('progress', { valueAsNumber: true })} />
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            {...register("progress", { valueAsNumber: true })}
+          />
         </div>
       </div>
 
       <ProgressBar value={progress ?? 0} />
 
       <div className="space-y-2">
+        <Label>Agreed project amount (USD)</Label>
+        <Input
+          type="number"
+          min={0}
+          step="0.01"
+          placeholder="Set before approving to price the invoice"
+          {...register("budgetAmount", {
+            setValueAs: (value) => (value === "" ? null : Number(value)),
+          })}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Project link</Label>
-        <Input placeholder="https://staging.example.com" {...register('projectUrl')} />
+        <Input
+          placeholder="https://staging.example.com"
+          {...register("projectUrl")}
+        />
       </div>
 
       <div className="space-y-2">
         <Label>Internal notes</Label>
-        <Textarea rows={5} placeholder="Progress notes, blockers, next steps…" {...register('notes')} />
+        <Textarea
+          rows={5}
+          placeholder="Progress notes, blockers, next steps…"
+          {...register("notes")}
+        />
       </div>
 
       <div className="flex justify-end border-t border-app pt-4">
         <Button type="submit" disabled={isSubmitting || !isDirty}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? "Saving…" : "Save changes"}
         </Button>
       </div>
     </form>

@@ -90,7 +90,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <SidebarNav isActive={isActive} onClick={() => setOpen(false)} />
+          <SidebarNav
+            isActive={isActive}
+            onClick={() => setOpen(false)}
+            mobile
+          />
           <div className="p-3">
             <SignOutButton />
           </div>
@@ -119,31 +123,56 @@ function Brand() {
 function SidebarNav({
   isActive,
   onClick,
+  mobile = false,
 }: {
   isActive: (href: string, exact?: boolean) => boolean;
   onClick?: () => void;
+  mobile?: boolean;
 }) {
+  const mainItems = mobile
+    ? nav.filter(
+        (item) =>
+          !["/dashboard", "/dashboard/profile", "/dashboard/settings"].includes(
+            item.href,
+          ),
+      )
+    : nav;
+  const bottomItems = mobile
+    ? nav.filter((item) =>
+        ["/dashboard", "/dashboard/profile", "/dashboard/settings"].includes(
+          item.href,
+        ),
+      )
+    : [];
+  const renderItem = (item: (typeof nav)[number], label = item.label) => {
+    const active = isActive(item.href, item.exact);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onClick}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+          active
+            ? "bg-card text-body shadow-card"
+            : "text-muted hover:bg-card hover:text-body",
+        )}
+      >
+        <item.icon className="h-4 w-4" />
+        {label}
+      </Link>
+    );
+  };
   return (
     <nav className="flex-1 space-y-1 p-3">
-      {nav.map((n) => {
-        const active = isActive(n.href, n.exact);
-        return (
-          <Link
-            key={n.href}
-            href={n.href}
-            onClick={onClick}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              active
-                ? "bg-card text-body shadow-card"
-                : "text-muted hover:bg-card hover:text-body",
-            )}
-          >
-            <n.icon className="h-4 w-4" />
-            {n.label}
-          </Link>
-        );
-      })}
+      {mainItems.map((item) => renderItem(item))}
+      {mobile ? (
+        <div className="my-3 border-t border-app pt-3">
+          {bottomItems.map((item) =>
+            renderItem(item, item.href === "/dashboard" ? "Home" : item.label),
+          )}
+        </div>
+      ) : null}
     </nav>
   );
 }

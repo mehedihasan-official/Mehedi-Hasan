@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import { z } from "zod";
 import {
-  BUDGET_RANGES,
   BRIEF_STATUSES,
+  BUDGET_RANGES,
   CURRENCIES,
   INVOICE_STATUSES,
   ORDER_STATUSES,
@@ -12,7 +12,7 @@ import {
   SOURCES,
   STAGE_STATUSES,
   TIMELINES,
-} from './enums';
+} from "./enums";
 
 // ---------- User ----------
 export const emailEntrySchema = z.object({
@@ -44,8 +44,8 @@ export type User = z.infer<typeof userSchema>;
 
 // ---------- Client ----------
 export const clientCreateSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(120),
-  emails: z.array(emailEntrySchema).min(1, 'At least one email is required'),
+  name: z.string().min(1, "Name is required").max(120),
+  emails: z.array(emailEntrySchema).min(1, "At least one email is required"),
   phone: z.string().max(30).optional().nullable(),
   whatsapp: z.string().max(30).optional().nullable(),
   address: z.string().max(500).optional().nullable(),
@@ -83,7 +83,7 @@ export const briefCreateSchema = z.object({
   budgetRange: z.enum(BUDGET_RANGES),
   timeline: z.enum(TIMELINES),
   message: z.string().max(4000).optional().nullable(),
-  source: z.enum(SOURCES).default('contact_form'),
+  source: z.enum(SOURCES).default("contact_form"),
 });
 export type BriefCreateInput = z.infer<typeof briefCreateSchema>;
 
@@ -115,16 +115,16 @@ export const projectCreateSchema = z.object({
   clientId: z.string(),
   title: z.string().min(1).max(200),
   serviceType: z.enum(SERVICE_TYPES),
-  category: z.enum(PROJECT_CATEGORIES).default('other'),
+  category: z.enum(PROJECT_CATEGORIES).default("other"),
   description: z.string().max(4000).optional().nullable(),
   stack: z.array(z.string().max(60)).default([]),
   budget: z.number().nonnegative().optional().nullable(),
-  currency: z.enum(CURRENCIES).default('USD'),
+  currency: z.enum(CURRENCIES).default("USD"),
   startDate: z.string().optional().nullable(),
   dueDate: z.string().optional().nullable(),
   links: projectLinksSchema.optional(),
   coverImage: z.string().url().optional().nullable(),
-  status: z.enum(PROJECT_STATUSES).default('planning'),
+  status: z.enum(PROJECT_STATUSES).default("planning"),
   internalNotes: z.string().max(4000).optional().nullable(),
   cost: z.number().nonnegative().optional().nullable(),
 });
@@ -146,7 +146,7 @@ export const stageSchema = z.object({
   projectId: z.string(),
   name: z.string().min(1).max(120),
   order: z.number().int().nonnegative(),
-  status: z.enum(STAGE_STATUSES).default('planned'),
+  status: z.enum(STAGE_STATUSES).default("planned"),
   dueDate: z.string().optional().nullable(),
   deliveredAt: z.string().nullable(),
   notes: z.string().max(2000).optional().nullable(),
@@ -157,24 +157,35 @@ export type Stage = z.infer<typeof stageSchema>;
 
 export const STAGE_TEMPLATES: Record<string, string[]> = {
   web_app: [
-    'Setup + Auth',
-    'Header + Home + Footer',
-    'Core Features',
-    'Detail Pages',
-    'Admin / Dashboard',
-    'QA + Deployment',
+    "Setup + Auth",
+    "Header + Home + Footer",
+    "Core Features",
+    "Detail Pages",
+    "Admin / Dashboard",
+    "QA + Deployment",
   ],
   mobile_app: [
-    'Setup + Auth',
-    'Navigation + Home',
-    'Core Screens',
-    'Detail Screens',
-    'Push + Notifications',
-    'Store Submission',
+    "Setup + Auth",
+    "Navigation + Home",
+    "Core Screens",
+    "Detail Screens",
+    "Push + Notifications",
+    "Store Submission",
   ],
-  meta_ads: ['Research + Audience', 'Creative Production', 'Launch', 'Optimization', 'Report'],
-  wordpress: ['Setup + Theme', 'Pages + Content', 'Plugins + Forms', 'QA + Launch'],
-  other: ['Discovery', 'Delivery', 'Review'],
+  meta_ads: [
+    "Research + Audience",
+    "Creative Production",
+    "Launch",
+    "Optimization",
+    "Report",
+  ],
+  wordpress: [
+    "Setup + Theme",
+    "Pages + Content",
+    "Plugins + Forms",
+    "QA + Launch",
+  ],
+  other: ["Discovery", "Delivery", "Review"],
 };
 
 // ---------- Invoice ----------
@@ -189,10 +200,11 @@ export const invoiceSchema = z.object({
   id: z.string(),
   number: z.string(),
   projectId: z.string(),
+  orderId: z.string().nullable().optional(),
   clientId: z.string(),
   items: z.array(invoiceItemSchema).min(1),
   amount: z.number().nonnegative(),
-  currency: z.enum(CURRENCIES).default('USD'),
+  currency: z.enum(CURRENCIES).default("USD"),
   status: z.enum(INVOICE_STATUSES),
   dueDate: z.string().optional().nullable(),
   sentAt: z.string().nullable(),
@@ -212,18 +224,43 @@ export const messageCreateSchema = z.object({
 export type MessageCreateInput = z.infer<typeof messageCreateSchema>;
 
 // ---------- Order ----------
-export const orderCreateSchema = z.object({
-  serviceType: z.enum(SERVICE_TYPES),
-  budgetRange: z.enum(BUDGET_RANGES),
-  timeline: z.enum(TIMELINES),
-  description: z.string().min(1, 'Tell me a bit about what you need').max(4000),
-});
+export const orderCreateSchema = z
+  .object({
+    serviceType: z.enum(SERVICE_TYPES),
+    budgetRange: z.enum(BUDGET_RANGES),
+    budgetAmount: z.number().nonnegative().nullable().optional(),
+    timeline: z.enum(TIMELINES),
+    projectType: z.enum(["single", "milestone"]).default("single"),
+    milestones: z
+      .array(
+        z.object({
+          name: z.string().min(1).max(120),
+          description: z.string().max(2000),
+          deadlineOrDuration: z.string().min(1).max(120),
+        }),
+      )
+      .default([]),
+    description: z
+      .string()
+      .min(1, "Tell me a bit about what you need")
+      .max(4000),
+  })
+  .superRefine((value, context) => {
+    if (value.projectType === "milestone" && value.milestones.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["milestones"],
+        message: "Add at least one milestone.",
+      });
+    }
+  });
 export type OrderCreateInput = z.infer<typeof orderCreateSchema>;
 
 // Admin-only edits made from the order detail page.
 export const orderUpdateSchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),
   progress: z.number().int().min(0).max(100).optional(),
+  budgetAmount: z.number().nonnegative().nullable().optional(),
   projectUrl: z.string().url().max(500).optional().nullable(),
   notes: z.string().max(4000).optional().nullable(),
 });
@@ -240,12 +277,13 @@ export const meUpdateSchema = z.object({
 });
 export type MeUpdateInput = z.infer<typeof meUpdateSchema>;
 
-export const orderSchema = orderCreateSchema.extend({
+export const orderSchema = orderCreateSchema.innerType().extend({
   id: z.string(),
   orderCode: z.string(),
   clientId: z.string(),
   clientName: z.string().optional(),
   clientEmail: z.string().optional(),
+  clientWhatsapp: z.string().nullable().optional(),
   status: z.enum(ORDER_STATUSES),
   progress: z.number().int().min(0).max(100).default(0),
   projectUrl: z.string().url().nullable(),

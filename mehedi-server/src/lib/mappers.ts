@@ -1,7 +1,13 @@
-import type { UserDoc } from '../models/User.js';
-import type { OrderDoc } from '../models/Order.js';
-import type { BriefDoc } from '../models/Brief.js';
-import type { Brief, Client, Order, SessionUser, User } from '../shared/index.js';
+import type { BriefDoc } from "../models/Brief.js";
+import type { OrderDoc } from "../models/Order.js";
+import type { UserDoc } from "../models/User.js";
+import type {
+  Brief,
+  Client,
+  Order,
+  SessionUser,
+  User,
+} from "../shared/index.js";
 
 type WithId<T> = T & { _id: unknown; createdAt?: Date; updatedAt?: Date };
 
@@ -13,7 +19,7 @@ function primaryEmail(user: WithId<UserDoc>): string {
 export function toSessionUser(user: WithId<UserDoc>): SessionUser {
   return {
     id: String(user._id),
-    role: user.role as SessionUser['role'],
+    role: user.role as SessionUser["role"],
     name: user.name,
     email: primaryEmail(user),
     avatar: user.avatar ?? null,
@@ -26,7 +32,7 @@ export function toSessionUser(user: WithId<UserDoc>): SessionUser {
 export function toUser(user: WithId<UserDoc>): User {
   return {
     id: String(user._id),
-    role: user.role as User['role'],
+    role: user.role as User["role"],
     name: user.name,
     emails: user.emails.map((e) => ({
       address: e.address,
@@ -39,19 +45,26 @@ export function toUser(user: WithId<UserDoc>): User {
     timezone: user.timezone ?? null,
     country: user.country ?? null,
     avatar: user.avatar ?? null,
-    source: (user.source as User['source']) ?? null,
+    source: (user.source as User["source"]) ?? null,
     active: !!user.active,
     blocked: !!user.blocked,
     lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
-    createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString(),
-    updatedAt: user.updatedAt ? user.updatedAt.toISOString() : new Date().toISOString(),
+    createdAt: user.createdAt
+      ? user.createdAt.toISOString()
+      : new Date().toISOString(),
+    updatedAt: user.updatedAt
+      ? user.updatedAt.toISOString()
+      : new Date().toISOString(),
   };
 }
 
-export function toClient(user: WithId<UserDoc>, extras?: {
-  activeProjectCount?: number;
-  lifetimeValue?: number;
-}): Client {
+export function toClient(
+  user: WithId<UserDoc>,
+  extras?: {
+    activeProjectCount?: number;
+    lifetimeValue?: number;
+  },
+): Client {
   return {
     id: String(user._id),
     name: user.name,
@@ -65,21 +78,27 @@ export function toClient(user: WithId<UserDoc>, extras?: {
     address: user.address ?? null,
     timezone: user.timezone ?? null,
     country: user.country ?? null,
-    source: (user.source as Client['source']) ?? null,
+    source: (user.source as Client["source"]) ?? null,
     notes: user.notes ?? null,
     avatar: user.avatar ?? null,
     active: !!user.active,
     activeProjectCount: extras?.activeProjectCount ?? 0,
     lifetimeValue: extras?.lifetimeValue ?? 0,
-    lastActivityAt: user.lastActivityAt ? user.lastActivityAt.toISOString() : null,
-    createdAt: user.createdAt ? user.createdAt.toISOString() : new Date().toISOString(),
-    updatedAt: user.updatedAt ? user.updatedAt.toISOString() : new Date().toISOString(),
+    lastActivityAt: user.lastActivityAt
+      ? user.lastActivityAt.toISOString()
+      : null,
+    createdAt: user.createdAt
+      ? user.createdAt.toISOString()
+      : new Date().toISOString(),
+    updatedAt: user.updatedAt
+      ? user.updatedAt.toISOString()
+      : new Date().toISOString(),
   };
 }
 
 export function toOrder(
   order: WithId<OrderDoc>,
-  client?: { name?: string; email?: string } | null,
+  client?: { name?: string; email?: string; whatsapp?: string | null } | null,
 ): Order {
   return {
     id: String(order._id),
@@ -87,16 +106,24 @@ export function toOrder(
     clientId: String(order.clientId),
     clientName: client?.name,
     clientEmail: client?.email,
-    serviceType: order.serviceType as Order['serviceType'],
-    budgetRange: order.budgetRange as Order['budgetRange'],
-    timeline: order.timeline as Order['timeline'],
+    clientWhatsapp: client?.whatsapp ?? null,
+    serviceType: order.serviceType as Order["serviceType"],
+    budgetRange: order.budgetRange as Order["budgetRange"],
+    budgetAmount: order.budgetAmount ?? null,
+    timeline: order.timeline as Order["timeline"],
+    projectType: order.projectType ?? "single",
+    milestones: order.milestones ?? [],
     description: order.description,
-    status: order.status as Order['status'],
+    status: order.status as Order["status"],
     progress: order.progress ?? 0,
     projectUrl: order.projectUrl ?? null,
     notes: order.notes ?? null,
-    createdAt: order.createdAt ? order.createdAt.toISOString() : new Date().toISOString(),
-    updatedAt: order.updatedAt ? order.updatedAt.toISOString() : new Date().toISOString(),
+    createdAt: order.createdAt
+      ? order.createdAt.toISOString()
+      : new Date().toISOString(),
+    updatedAt: order.updatedAt
+      ? order.updatedAt.toISOString()
+      : new Date().toISOString(),
   };
 }
 
@@ -107,15 +134,19 @@ export function toBrief(brief: WithId<BriefDoc>): Brief {
     email: brief.email,
     phone: brief.phone ?? null,
     whatsapp: brief.whatsapp ?? null,
-    serviceType: brief.serviceType as Brief['serviceType'],
-    budgetRange: brief.budgetRange as Brief['budgetRange'],
-    timeline: brief.timeline as Brief['timeline'],
+    serviceType: brief.serviceType as Brief["serviceType"],
+    budgetRange: brief.budgetRange as Brief["budgetRange"],
+    timeline: brief.timeline as Brief["timeline"],
     message: brief.message ?? null,
-    source: (brief.source as Brief['source']) ?? 'contact_form',
-    status: (brief.status as Brief['status']) ?? 'new',
+    source: (brief.source as Brief["source"]) ?? "contact_form",
+    status: (brief.status as Brief["status"]) ?? "new",
     userId: brief.userId ? String(brief.userId) : null,
     orderId: brief.orderId ? String(brief.orderId) : null,
-    createdAt: brief.createdAt ? brief.createdAt.toISOString() : new Date().toISOString(),
-    updatedAt: brief.updatedAt ? brief.updatedAt.toISOString() : new Date().toISOString(),
+    createdAt: brief.createdAt
+      ? brief.createdAt.toISOString()
+      : new Date().toISOString(),
+    updatedAt: brief.updatedAt
+      ? brief.updatedAt.toISOString()
+      : new Date().toISOString(),
   };
 }
