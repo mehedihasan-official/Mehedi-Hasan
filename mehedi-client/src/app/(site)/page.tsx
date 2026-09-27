@@ -1,37 +1,37 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import mehediPhoto from "@/assets/images/mehedi-hasan.jpg";
+import { ProjectCard } from "@/components/site/project-card";
+import { TestimonialCard } from "@/components/site/testimonial-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { FEATURED_PROJECTS, TESTIMONIALS } from "@/lib/portfolio-data";
 import {
   ArrowRight,
-  Sparkles,
-  MessageCircle,
   Clock,
-  ShieldCheck,
-  Wallet,
-  TrendingUp,
-  Rocket,
   Handshake,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { FEATURED_PROJECTS, TESTIMONIALS } from '@/lib/portfolio-data';
-import { ProjectCard } from '@/components/site/project-card';
-import { TestimonialCard } from '@/components/site/testimonial-card';
-import mehediPhoto from '@/assets/images/mehedi-hasan.jpg';
+  MessageCircle,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const outcomes = [
   {
     icon: TrendingUp,
-    title: 'Websites that grow your revenue',
-    desc: 'Landing pages, storefronts, and SaaS that turn visitors into customers — not just look pretty.',
+    title: "Websites that grow your revenue",
+    desc: "Landing pages, storefronts, and SaaS that turn visitors into customers — not just look pretty.",
   },
   {
     icon: Rocket,
-    title: 'Apps your customers actually use',
-    desc: 'iOS + Android from one codebase. Push notifications, payments, everything ready.',
+    title: "Apps your customers actually use",
+    desc: "iOS + Android from one codebase. Push notifications, payments, everything ready.",
   },
   {
     icon: Handshake,
-    title: 'Ads that bring real buyers',
+    title: "Ads that bring real buyers",
     desc: "Meta ads set up, tested, and optimized so you're not lighting money on fire.",
   },
 ];
@@ -39,22 +39,22 @@ const outcomes = [
 const whyMe = [
   {
     icon: MessageCircle,
-    title: 'You talk to me, not a sales rep',
+    title: "You talk to me, not a sales rep",
     desc: "No middlemen. You get direct WhatsApp access from day one until launch — and after.",
   },
   {
     icon: Clock,
-    title: 'Weeks, not quarters',
+    title: "Weeks, not quarters",
     desc: "Most projects ship in 2–6 weeks. I give you an honest timeline and stick to it.",
   },
   {
     icon: ShieldCheck,
-    title: 'You own everything',
+    title: "You own everything",
     desc: "Full source code, deployed to your account. No lock-in, no monthly fees to me.",
   },
   {
     icon: Wallet,
-    title: 'Fair, upfront pricing',
+    title: "Fair, upfront pricing",
     desc: "No hidden costs. You know the price before we start. Payoneer or bKash — your call.",
   },
 ];
@@ -75,15 +75,17 @@ export default function HomePage() {
           <div className="flex items-start gap-4 sm:gap-6 lg:hidden">
             <div className="min-w-0 flex-1">
               <Badge tone="brand" className="mb-4">
-                <Sparkles className="mr-1 h-3 w-3" />
-                2 new projects open
+                <Sparkles className="mr-1 h-3 w-3" />2 new projects open
               </Badge>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Your idea, <span className="text-gradient-brand">shipped and earning</span>.
+                Your idea,{" "}
+                <span className="text-gradient-brand">shipped and earning</span>
+                .
               </h1>
               <p className="mt-4 text-base text-muted sm:text-lg">
-                You know your business. I build the tech that grows it — websites, apps, and ads
-                that save you hours, win you customers, and let you sleep at night.
+                You know your business. I build the tech that grows it —
+                websites, apps, and ads that save you hours, win you customers,
+                and let you sleep at night.
               </p>
             </div>
             <div className="relative w-28 shrink-0 sm:w-36">
@@ -111,16 +113,19 @@ export default function HomePage() {
                 Taking on 2 new projects this month
               </Badge>
               <h1 className="mt-6 hidden max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:mt-0 lg:block">
-                Your idea, <span className="text-gradient-brand">shipped and earning</span> — without the tech headache.
+                Your idea,{" "}
+                <span className="text-gradient-brand">shipped and earning</span>{" "}
+                — without the tech headache.
               </h1>
               <p className="mt-6 hidden max-w-2xl text-lg text-muted lg:block">
-                You know your business. I build the tech that grows it — websites, apps, and ads that
-                save you hours, win you customers, and let you sleep at night. No jargon. No excuses.
-                Just work that ships.
+                You know your business. I build the tech that grows it —
+                websites, apps, and ads that save you hours, win you customers,
+                and let you sleep at night. No jargon. No excuses. Just work
+                that ships.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
-                  <Link href="/start-project">
+                  <Link href="/dashboard/orders/new">
                     Start your project <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -131,14 +136,21 @@ export default function HomePage() {
 
               <dl className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                  { label: 'Years shipping', value: '4+' },
-                  { label: 'Happy clients', value: '20+' },
-                  { label: 'Countries served', value: '10+' },
-                  { label: 'Come back for more', value: '85%' },
+                  { label: "Years shipping", value: "4+" },
+                  { label: "Happy clients", value: "20+" },
+                  { label: "Countries served", value: "10+" },
+                  { label: "Come back for more", value: "85%" },
                 ].map((h) => (
-                  <div key={h.label} className="rounded-2xl border border-app bg-card p-5">
-                    <dt className="text-xs uppercase tracking-wider text-subtle">{h.label}</dt>
-                    <dd className="mt-2 text-2xl font-semibold text-body">{h.value}</dd>
+                  <div
+                    key={h.label}
+                    className="rounded-2xl border border-app bg-card p-5"
+                  >
+                    <dt className="text-xs uppercase tracking-wider text-subtle">
+                      {h.label}
+                    </dt>
+                    <dd className="mt-2 text-2xl font-semibold text-body">
+                      {h.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -162,8 +174,12 @@ export default function HomePage() {
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 </span>
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-body">Mehedi Hasan</div>
-                  <div className="truncate text-xs text-muted">Founder &amp; developer · Dhaka, BD</div>
+                  <div className="truncate text-sm font-semibold text-body">
+                    Mehedi Hasan
+                  </div>
+                  <div className="truncate text-xs text-muted">
+                    Founder &amp; developer · Dhaka, BD
+                  </div>
                 </div>
               </div>
             </div>
@@ -178,7 +194,8 @@ export default function HomePage() {
             What I actually deliver
           </h2>
           <p className="mt-2 text-muted">
-            Not a list of technologies. A list of results. You bring the goal — I bring the execution.
+            Not a list of technologies. A list of results. You bring the goal —
+            I bring the execution.
           </p>
         </div>
 
@@ -206,10 +223,14 @@ export default function HomePage() {
               Real problems. Real results.
             </h2>
             <p className="mt-2 text-muted">
-              A handful of recent projects — with the problem the client had and what they got.
+              A handful of recent projects — with the problem the client had and
+              what they got.
             </p>
           </div>
-          <Link href="/work" className="hidden text-sm text-muted hover:text-body md:inline">
+          <Link
+            href="/work"
+            className="hidden text-sm text-muted hover:text-body md:inline"
+          >
             All projects →
           </Link>
         </div>
@@ -234,7 +255,10 @@ export default function HomePage() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {whyMe.map((w) => (
-            <div key={w.title} className="rounded-2xl border border-app bg-card p-6">
+            <div
+              key={w.title}
+              className="rounded-2xl border border-app bg-card p-6"
+            >
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-elev">
                 <w.icon className="h-5 w-5 text-brand-500" />
               </div>
@@ -272,12 +296,13 @@ export default function HomePage() {
               Have an idea? Let&apos;s make it real.
             </h2>
             <p className="mt-3 max-w-2xl text-muted">
-              Every project starts with a short conversation on WhatsApp or a quick call. Tell me
-              what you need — I&apos;ll come back with a plan, timeline, and a fair price. No pressure.
+              Every project starts with a short conversation on WhatsApp or a
+              quick call. Tell me what you need — I&apos;ll come back with a
+              plan, timeline, and a fair price. No pressure.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/start-project">Start your project</Link>
+                <Link href="/dashboard/orders/new">Start your project</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link href="/contact">Or just say hi</Link>

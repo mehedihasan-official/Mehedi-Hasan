@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  Home,
   Inbox,
   LayoutDashboard,
   Menu,
@@ -20,11 +21,17 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    exact: true,
+  },
   { href: "/dashboard/briefs", label: "Briefs", icon: Inbox },
   { href: "/dashboard/orders", label: "Orders", icon: Package },
   { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
   { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+  { href: "/", label: "Home", icon: Home, exact: true },
   { href: "/dashboard/profile", label: "Profile", icon: UserCircle },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -48,7 +55,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-app bg-app/80 px-4 backdrop-blur-xl md:hidden">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 font-semibold"
+          >
             <span className="grid h-7 w-7 place-items-center rounded-md gradient-brand text-xs font-bold text-white">
               M
             </span>
@@ -109,7 +119,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 function Brand() {
   return (
     <Link
-      href="/"
+      href="/dashboard"
       className="flex h-16 items-center gap-2 border-b border-app px-5 font-semibold"
     >
       <span className="grid h-8 w-8 place-items-center rounded-lg gradient-brand text-sm font-bold text-white">
@@ -132,16 +142,14 @@ function SidebarNav({
   const mainItems = mobile
     ? nav.filter(
         (item) =>
-          !["/dashboard", "/dashboard/profile", "/dashboard/settings"].includes(
+          !["/", "/dashboard/profile", "/dashboard/settings"].includes(
             item.href,
           ),
       )
     : nav;
   const bottomItems = mobile
     ? nav.filter((item) =>
-        ["/dashboard", "/dashboard/profile", "/dashboard/settings"].includes(
-          item.href,
-        ),
+        ["/", "/dashboard/profile", "/dashboard/settings"].includes(item.href),
       )
     : [];
   const renderItem = (item: (typeof nav)[number], label = item.label) => {
@@ -168,9 +176,7 @@ function SidebarNav({
       {mainItems.map((item) => renderItem(item))}
       {mobile ? (
         <div className="my-3 border-t border-app pt-3">
-          {bottomItems.map((item) =>
-            renderItem(item, item.href === "/dashboard" ? "Home" : item.label),
-          )}
+          {bottomItems.map((item) => renderItem(item))}
         </div>
       ) : null}
     </nav>
