@@ -25,6 +25,15 @@ export function SiteNav() {
   const pathname = usePathname();
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const menuLinks = session
+    ? [
+        {
+          href: session.user.role === "admin" ? "/admin" : "/dashboard",
+          label: "Dashboard",
+        },
+        ...links,
+      ]
+    : links;
 
   return (
     <>
@@ -41,7 +50,7 @@ export function SiteNav() {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
-            {links.map((l) => {
+            {menuLinks.map((l) => {
               const active = isActive(l.href);
               return (
                 <Link
@@ -145,7 +154,7 @@ export function SiteNav() {
             <X className="h-5 w-5" />
           </button>
         </div>
-        {links.map((l) => {
+        {menuLinks.map((l) => {
           const active = isActive(l.href);
           return (
             <Link
@@ -166,17 +175,7 @@ export function SiteNav() {
         })}
         <div className="mt-auto grid grid-cols-2 gap-2 border-t border-app pt-5">
           {session ? (
-            <>
-              <Button asChild variant="outline">
-                <Link
-                  href={session.user.role === "admin" ? "/admin" : "/dashboard"}
-                  onClick={() => setOpen(false)}
-                >
-                  Dashboard
-                </Link>
-              </Button>
-              <SignOutButton className="justify-center border border-app" />
-            </>
+            <SignOutButton className="col-span-2 justify-center border border-app" />
           ) : (
             <>
               <Button asChild variant="ghost">
