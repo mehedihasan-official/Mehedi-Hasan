@@ -1,9 +1,10 @@
 import mehediPhoto from "@/assets/images/mehedi-hasan.jpg";
 import { ProjectCard } from "@/components/site/project-card";
-import { TestimonialCard } from "@/components/site/testimonial-card";
+import { ResponsiveCarousel } from "@/components/site/responsive-carousel";
+import { TestimonialSection } from "@/components/site/testimonial-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FEATURED_PROJECTS, TESTIMONIALS } from "@/lib/portfolio-data";
+import { FEATURED_PROJECTS } from "@/lib/portfolio-data";
 import {
   ArrowRight,
   Clock,
@@ -214,10 +215,15 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED_PROJECTS.map((p) => (
-            <ProjectCard key={p.slug} project={p} />
-          ))}
+        <div className="mt-10">
+          <ResponsiveCarousel
+            label="Featured projects"
+            columnsClassName="md:grid-cols-2 lg:grid-cols-3"
+          >
+            {FEATURED_PROJECTS.map((p) => (
+              <ProjectCard key={p.slug} project={p} />
+            ))}
+          </ResponsiveCarousel>
         </div>
       </section>
 
@@ -232,39 +238,26 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {whyMe.map((w) => (
             <div
               key={w.title}
-              className="rounded-2xl border border-app bg-card p-6"
+              className="min-w-0 rounded-2xl border border-app bg-card p-4 sm:p-6"
             >
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-elev">
+              <div className="grid h-9 w-9 place-items-center rounded-lg bg-elev sm:h-10 sm:w-10">
                 <w.icon className="h-5 w-5 text-brand-500" />
               </div>
-              <h3 className="mt-5 font-semibold">{w.title}</h3>
-              <p className="mt-2 text-sm text-muted">{w.desc}</p>
+              <h3 className="mt-4 text-sm font-semibold sm:mt-5 sm:text-base">
+                {w.title}
+              </h3>
+              <p className="mt-2 text-xs text-muted sm:text-sm">{w.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ---------------- Testimonials ---------------- */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            What clients actually say
-          </h2>
-          <p className="mt-2 text-muted">
-            Straight from WhatsApp, Fiverr, and email. No cherry-picking.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
-            <TestimonialCard key={i} testimonial={t} />
-          ))}
-        </div>
-      </section>
+      <TestimonialSection />
 
       {/* ---------------- CTA ---------------- */}
       <section className="mx-auto mt-8 max-w-6xl px-4 pb-16 md:px-6">

@@ -16,7 +16,14 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-type DashboardMessage = { unread: boolean };
+type DashboardMessage = {
+  projectId: string;
+  projectCode: string;
+  projectService?: string | null;
+  body: string;
+  createdAt: string;
+  unread: boolean;
+};
 
 export default async function ClientDashboardPage() {
   const session = await getSession();
@@ -57,6 +64,7 @@ export default async function ClientDashboardPage() {
   const openInvoices = invoiceData.invoices.filter(
     (invoice) => invoice.status !== "paid",
   );
+  const conversations = groupConversations(messageData.messages).slice(0, 2);
   const averageProgress = active.length
     ? Math.round(
         active.reduce((total, order) => total + order.progress, 0) /
@@ -185,6 +193,63 @@ export default async function ClientDashboardPage() {
       </Card>
 
       <Card>
+        <CardHeader className="p-4 sm:p-6">
+          <div>
+            <CardTitle>Project conversations</CardTitle>
+            <CardDescription>
+              Recent messages about your projects.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+          {conversations.length ? (
+            conversations.map((conversation) => (
+              <Link
+                key={conversation.projectId}
+                href={`/dashboard/messages/${conversation.projectId}`}
+                className="block rounded-lg border border-app p-4 transition-colors hover:border-strong"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-body">
+                      {conversation.projectCode}
+                    </p>
+                    <p className="text-xs capitalize text-muted">
+                      {conversation.projectService?.replaceAll("_", " ") ??
+                        "Project"}
+                    </p>
+                  </div>
+                  {conversation.unread ? (
+                    <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      NEW
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-2 line-clamp-2 text-sm text-muted">
+                  {conversation.body}
+                </p>
+                <p className="mt-2 text-xs text-subtle">
+                  {formatDate(conversation.createdAt)}
+                </p>
+              </Link>
+            ))
+          ) : (
+            <div className="rounded-lg border border-dashed border-app p-4 text-sm text-muted">
+              Project messages will appear here.
+            </div>
+          )}
+          <div className="flex justify-end border-t border-app pt-3">
+            <Link
+              href="/dashboard/messages"
+              className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-brand-400"
+            >
+              See all conversations <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader>
           <CardTitle>Completed history</CardTitle>
           <CardDescription>
@@ -255,4 +320,31 @@ function EmptyList({ text }: { text: string }) {
       {text}
     </div>
   );
+}
+
+function groupConversations(messages: DashboardMessage[]) {
+  const conversations = new Map<string, DashboardMessage[]>();
+  for (const message of messages) {
+    conversations.set(message.projectId, [
+      ...(conversations.get(message.projectId) ?? []),
+      message,
+    ]);
+  }
+  return [...conversations.values()]
+    .map((group) => {
+      const latest = group.reduce((newest, message) =>
+        new Date(message.createdAt).getTime() >
+        new Date(newest.createdAt).getTime()
+          ? message
+          : newest,
+      );
+      return {
+        ...latest,
+        unread: group.some((message) => message.unread),
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 }

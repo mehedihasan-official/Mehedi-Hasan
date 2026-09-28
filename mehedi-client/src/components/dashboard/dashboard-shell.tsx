@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   Home,
-  Inbox,
   LayoutDashboard,
   Menu,
   MessageCircle,
@@ -27,7 +26,6 @@ const nav = [
     icon: LayoutDashboard,
     exact: true,
   },
-  { href: "/dashboard/briefs", label: "Briefs", icon: Inbox },
   { href: "/dashboard/orders", label: "Orders", icon: Package },
   { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
   { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
