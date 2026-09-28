@@ -14,6 +14,7 @@ export function ResponsiveCarousel({
 }) {
   const items = Children.toArray(children);
   const trackRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
   function scrollTo(index: number) {
@@ -47,8 +48,26 @@ export function ResponsiveCarousel({
       <div
         ref={trackRef}
         onScroll={updateActiveIndex}
+        onTouchStart={(event) => {
+          const touch = event.touches[0];
+          touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+        }}
+        onTouchEnd={(event) => {
+          const start = touchStartRef.current;
+          touchStartRef.current = null;
+          if (!start) return;
+
+          const touch = event.changedTouches[0];
+          const deltaX = touch.clientX - start.x;
+          const deltaY = touch.clientY - start.y;
+          if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+            return;
+          }
+
+          scrollTo(activeIndex + (deltaX < 0 ? 1 : -1));
+        }}
         aria-label={label}
-        className={`-mx-4 flex touch-pan-x snap-x snap-mandatory overscroll-x-contain overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:overflow-visible md:touch-auto ${columnsClassName}`}
+        className={`-mx-4 flex touch-pan-y snap-x snap-mandatory overscroll-x-contain overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:overflow-visible md:touch-auto ${columnsClassName}`}
       >
         {items.map((item, index) => (
           <div
