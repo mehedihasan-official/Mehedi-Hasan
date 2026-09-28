@@ -11,8 +11,9 @@ import {
 import { Label, Textarea } from "@/components/ui/input";
 import { useSession } from "@/hooks/use-session";
 import { apiFetch } from "@/lib/api";
+import { whatsappLink } from "@/lib/utils";
 import type { Order } from "@/shared";
-import { Send } from "lucide-react";
+import { ArrowUpRight, MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -38,6 +39,9 @@ type ConversationSummary = {
   unread: boolean;
   messageCount: number;
 };
+
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+
 export default function MessagesPage() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -104,6 +108,39 @@ export default function MessagesPage() {
           Send a question or update directly to the admin.
         </p>
       </div>
+      {whatsappNumber ? (
+        <div className="flex flex-col gap-4 rounded-2xl border border-emerald-600/20 bg-emerald-500/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+              <MessageCircle aria-hidden="true" className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold text-body">Prefer WhatsApp?</p>
+              <p className="mt-0.5 text-sm text-muted">
+                Start a direct chat about your project.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full shrink-0 border-emerald-700/25 text-emerald-800 hover:bg-emerald-500/10 dark:text-emerald-300 sm:w-auto"
+          >
+            <a
+              href={whatsappLink(
+                whatsappNumber,
+                `Hi, I'm ${session?.user.name ?? "a client"}. I'd like to discuss my project.`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle aria-hidden="true" className="size-4" />
+              Chat on WhatsApp
+              <ArrowUpRight aria-hidden="true" className="size-4" />
+            </a>
+          </Button>
+        </div>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Contact the admin</CardTitle>

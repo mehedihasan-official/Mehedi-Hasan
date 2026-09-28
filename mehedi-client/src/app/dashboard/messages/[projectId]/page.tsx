@@ -11,7 +11,8 @@ import {
 import { Textarea } from "@/components/ui/input";
 import { useSession } from "@/hooks/use-session";
 import { apiFetch } from "@/lib/api";
-import { ArrowLeft, Send } from "lucide-react";
+import { whatsappLink } from "@/lib/utils";
+import { ArrowLeft, ArrowUpRight, MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -26,6 +27,8 @@ type Conversation = {
   order: { orderCode: string; serviceType: string };
   messages: Message[];
 };
+
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
 
 export default function ClientConversationPage({
   params,
@@ -89,6 +92,33 @@ export default function ClientConversationPage({
               {conversation.order.serviceType.replace("_", " ")} conversation
             </p>
           </div>
+          {whatsappNumber ? (
+            <a
+              href={whatsappLink(
+                whatsappNumber,
+                `Hi, I have a question about order ${conversation.order.orderCode}.`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-16 items-center gap-3 rounded-xl border border-emerald-600/20 bg-emerald-500/5 p-4 transition-colors hover:border-emerald-600/40 hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 sm:px-5"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                <MessageCircle aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-medium text-body">
+                  Continue on WhatsApp
+                </span>
+                <span className="mt-0.5 block text-sm text-muted">
+                  Your order code will be included in the message.
+                </span>
+              </span>
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-5 shrink-0 text-emerald-700 dark:text-emerald-300"
+              />
+            </a>
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle>Conversation history</CardTitle>
