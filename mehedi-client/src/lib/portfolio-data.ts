@@ -149,11 +149,11 @@ type: 'quote',
 quote:
 "What I appreciate most about Mehedi is that he doesn't just do exactly what you ask. He thinks through the problem and often finds a better way to build it.",
 
-author: 'Florida, Ibrahim Elsamra',
+author: 'Ibrahim Elsamra',
 
 role: '',
 
-country: 'United States',
+country: 'Florida, United States',
 },
 
 {
