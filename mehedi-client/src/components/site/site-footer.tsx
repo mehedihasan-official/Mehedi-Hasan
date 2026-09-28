@@ -96,7 +96,7 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-app py-6 text-center text-xs text-subtle">
-        © {new Date().getFullYear()} Mehedi Hasan. Built with Next.js.
+       All rights reserved by © {new Date().getFullYear()} Mehedi Hasan.
       </div>
     </footer>
   );
