@@ -128,8 +128,9 @@ export function SiteNav() {
         aria-label="Mobile navigation"
         aria-hidden={!open}
         inert={!open}
+        style={{ backgroundColor: "var(--bg-card)" }}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(22rem,88vw)] flex-col border-l border-app bg-elev p-5 shadow-2xl transition-transform duration-300 md:hidden",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(22rem,88vw)] flex-col border-l border-app p-5 shadow-2xl transition-transform duration-300 md:hidden",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >

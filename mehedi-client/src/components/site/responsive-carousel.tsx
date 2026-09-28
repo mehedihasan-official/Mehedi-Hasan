@@ -48,7 +48,7 @@ export function ResponsiveCarousel({
         ref={trackRef}
         onScroll={updateActiveIndex}
         aria-label={label}
-        className={`-mx-4 flex snap-x snap-mandatory overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:overflow-visible ${columnsClassName}`}
+        className={`-mx-4 flex touch-pan-x snap-x snap-mandatory overscroll-x-contain overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:overflow-visible md:touch-auto ${columnsClassName}`}
       >
         {items.map((item, index) => (
           <div
