@@ -130,13 +130,46 @@ export const TESTIMONIALS: Testimonial[] = [
     author: 'Toufik Wyn',
     country: 'United States',
   },
-  {
-    type: 'quote',
-    quote:
-      "I don't speak developer. Mehedi speaks business. That's why our project actually shipped.",
-    author: 'Salman',
-    role: 'Founder, DBSEE',
-  },
+ {
+type: 'quote',
+
+quote:
+"Mehedi took a complicated idea and kept making it simpler with every update. I always knew what was happening and where the project stood.",
+
+author: 'Ash',
+
+role: '',
+
+country: 'Florida, United States',
+},
+
+{
+type: 'quote',
+
+quote:
+"What I appreciate most about Mehedi is that he doesn't just do exactly what you ask. He thinks through the problem and often finds a better way to build it.",
+
+author: 'Florida, Ibrahim Elsamra',
+
+role: '',
+
+country: 'United States',
+},
+
+{
+type: 'quote',
+
+quote:
+"Working with Mehedi felt easy. He understood what I wanted, handled the technical side without making it complicated, and kept things moving until everything was done.",
+
+author: 'Karen',
+
+role: '',
+
+country: 'United States',
+},
+
+
   // Add screenshot testimonials by dropping images into /public/testimonials/
   // and uncommenting:
   // {
