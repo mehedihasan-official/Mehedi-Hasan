@@ -24,7 +24,21 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
   const [editWhatsapp, setEditWhatsapp] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
   const { data: session } = useSession();
+  const query = search.trim().toLocaleLowerCase();
+  const numberQuery = query.replace(/\D/g, '');
+  const filteredLeads = query
+    ? leads.filter((lead) =>
+        lead.email.toLocaleLowerCase().includes(query) ||
+        Boolean(lead.name?.toLocaleLowerCase().includes(query)) ||
+        Boolean(lead.whatsapp?.toLocaleLowerCase().includes(query)) ||
+        Boolean(
+          numberQuery &&
+            lead.whatsapp?.replace(/\D/g, '').includes(numberQuery),
+        ),
+      )
+    : leads;
 
   async function addLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -152,7 +166,10 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Leads ({leads.length})</CardTitle>
+          <CardTitle>
+            Leads ({filteredLeads.length}
+            {query ? ` of ${leads.length}` : ''})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {leads.length === 0 ? (
@@ -160,8 +177,21 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
               No leads yet. Account emails will appear here after a successful login.
             </p>
           ) : (
-            <div className="divide-y divide-app">
-              {leads.map((lead) => (
+            <div className="space-y-4">
+              <Input
+                type="search"
+                aria-label="Search leads by email, name, or WhatsApp number"
+                placeholder="Search by email, name, or WhatsApp number…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              {filteredLeads.length === 0 ? (
+                <p className="py-5 text-sm text-muted">
+                  No leads match “{search.trim()}”.
+                </p>
+              ) : (
+                <div className="divide-y divide-app">
+                  {filteredLeads.map((lead) => (
                 <div
                   key={lead.id}
                   className="py-4 first:pt-0 last:pb-0"
@@ -260,7 +290,9 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
                     </div>
                   )}
                 </div>
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </CardContent>
