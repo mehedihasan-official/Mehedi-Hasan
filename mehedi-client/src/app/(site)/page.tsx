@@ -195,7 +195,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- Projects gallery ---------------- */}
+      {/* ---------------- Pr4ojects gallery ---------------- */}
       <section id="work" className="mx-auto max-w-6xl px-4 py-16 md:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
@@ -210,7 +210,7 @@ export default function HomePage() {
           <Link
             href="/work"
             className="hidden text-sm text-muted hover:text-body md:inline"
-          >
+          > 
             All projects →
           </Link>
         </div>

@@ -42,6 +42,22 @@ export const userSchema = z.object({
 });
 export type User = z.infer<typeof userSchema>;
 
+// ---------- Lead ----------
+export const leadCreateSchema = z.object({
+  email: z.string().trim().email().transform((email) => email.toLowerCase()),
+});
+export type LeadCreateInput = z.infer<typeof leadCreateSchema>;
+
+export const leadSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  name: z.string().nullable(),
+  source: z.enum(['login', 'manual']),
+  lastLoginAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type Lead = z.infer<typeof leadSchema>;
+
 // ---------- Client ----------
 export const clientCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(120),
