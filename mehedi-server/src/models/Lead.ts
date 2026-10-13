@@ -4,6 +4,7 @@ const leadSchema = new Schema(
   {
     email: { type: String, required: true, lowercase: true, trim: true, unique: true },
     name: { type: String, trim: true },
+    whatsapp: { type: String, trim: true, default: null },
     source: { type: String, enum: ['login', 'manual'], required: true },
     lastLoginAt: { type: Date, default: null },
   },

@@ -57,10 +57,9 @@ router.post(
       { email },
       {
         $set: {
-          name: user.name,
           lastLoginAt: loggedInAt,
         },
-        $setOnInsert: { email, source: 'login' },
+        $setOnInsert: { email, name: user.name, source: 'login' },
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
