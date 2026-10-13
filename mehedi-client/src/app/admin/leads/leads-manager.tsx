@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Heart, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Lead } from '@/shared';
 import { Badge } from '@/components/ui/badge';
@@ -24,12 +24,14 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
   const [editWhatsapp, setEditWhatsapp] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [importanceId, setImportanceId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const { data: session } = useSession();
   const query = search.trim().toLocaleLowerCase();
   const numberQuery = query.replace(/\D/g, '');
-  const filteredLeads = query
-    ? leads.filter((lead) =>
+  const filteredLeads = [
+    ...(query
+      ? leads.filter((lead) =>
         lead.email.toLocaleLowerCase().includes(query) ||
         Boolean(lead.name?.toLocaleLowerCase().includes(query)) ||
         Boolean(lead.whatsapp?.toLocaleLowerCase().includes(query)) ||
@@ -37,8 +39,9 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
           numberQuery &&
             lead.whatsapp?.replace(/\D/g, '').includes(numberQuery),
         ),
-      )
-    : leads;
+        )
+      : leads),
+  ].sort((left, right) => Number(right.important) - Number(left.important));
 
   async function addLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -108,6 +111,23 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete lead');
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function toggleImportant(lead: Lead) {
+    setImportanceId(lead.id);
+    try {
+      const { lead: updated } = await apiFetch<{ lead: Lead }>(`/leads/${lead.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ important: !lead.important }),
+        token: session?.apiToken ?? null,
+      });
+      setLeads((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      toast.success(updated.important ? 'Lead marked important' : 'Lead unmarked');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update lead importance');
+    } finally {
+      setImportanceId(null);
     }
   }
 
@@ -265,6 +285,22 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          aria-label={lead.important ? 'Remove important mark' : 'Mark lead important'}
+                          aria-pressed={lead.important}
+                          title={lead.important ? 'Important lead' : 'Mark as important'}
+                          onClick={() => toggleImportant(lead)}
+                          disabled={Boolean(importanceId) || deletingId === lead.id}
+                          className={lead.important ? 'text-rose-500 hover:text-rose-400' : 'text-muted'}
+                        >
+                          <Heart
+                            className="h-4 w-4"
+                            fill={lead.important ? 'currentColor' : 'none'}
+                          />
+                        </Button>
                         <Badge tone={lead.source === 'login' ? 'brand' : 'neutral'}>
                           {lead.source === 'login' ? 'Account login' : 'Manual'}
                         </Badge>
