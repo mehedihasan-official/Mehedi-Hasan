@@ -12,13 +12,14 @@ router.use(requireAuth, requireRole('admin'));
 router.get(
   '/',
   asyncHandler(async (_req, res) => {
-    const leads = await LeadModel.find().sort({ createdAt: -1 }).lean();
+    const leads = await LeadModel.find().sort({ important: -1, createdAt: -1 }).lean();
     res.json({
       leads: leads.map((lead) => ({
         id: String(lead._id),
         email: lead.email,
         name: lead.name ?? null,
         whatsapp: lead.whatsapp ?? null,
+        important: lead.important ?? false,
         source: lead.source,
         lastLoginAt: lead.lastLoginAt?.toISOString() ?? null,
         createdAt: lead.createdAt.toISOString(),
@@ -46,6 +47,7 @@ router.post(
         email: lead.email,
         name: lead.name ?? null,
         whatsapp: lead.whatsapp ?? null,
+        important: lead.important ?? false,
         source: lead.source,
         lastLoginAt: lead.lastLoginAt?.toISOString() ?? null,
         createdAt: lead.createdAt.toISOString(),
@@ -79,6 +81,7 @@ router.patch(
         email: lead.email,
         name: lead.name ?? null,
         whatsapp: lead.whatsapp ?? null,
+        important: lead.important ?? false,
         source: lead.source,
         lastLoginAt: lead.lastLoginAt?.toISOString() ?? null,
         createdAt: lead.createdAt.toISOString(),
