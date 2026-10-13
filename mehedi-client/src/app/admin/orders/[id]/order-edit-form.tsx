@@ -28,10 +28,20 @@ export function OrderEditForm({ order }: { order: Order }) {
   } = useForm<OrderUpdateInput>({
     resolver: zodResolver(orderUpdateSchema),
     defaultValues: {
+      projectName: order.projectName ?? "",
       status: order.status,
       progress: order.progress,
       budgetAmount: order.budgetAmount ?? null,
       projectUrl: order.projectUrl ?? "",
+      links: {
+        live: order.links?.live ?? "",
+        staging: order.links?.staging ?? "",
+        repo: order.links?.repo ?? "",
+        figma: order.links?.figma ?? "",
+        docs: order.links?.docs ?? "",
+        sharedFolder: order.links?.sharedFolder ?? "",
+      },
+      internalInfo: order.internalInfo ?? "",
       notes: order.notes ?? "",
     },
   });
@@ -58,6 +68,10 @@ export function OrderEditForm({ order }: { order: Order }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label>Project name</Label>
+          <Input maxLength={200} {...register("projectName")} />
+        </div>
         <div className="space-y-2">
           <Label>Status</Label>
           <select
@@ -98,11 +112,50 @@ export function OrderEditForm({ order }: { order: Order }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Project link</Label>
+        <Label>Main project URL</Label>
         <Input
-          placeholder="https://staging.example.com"
+          type="url"
+          placeholder="https://example.com"
           {...register("projectUrl")}
         />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Live site</Label>
+          <Input type="url" placeholder="https://…" {...register("links.live")} />
+        </div>
+        <div className="space-y-2">
+          <Label>Staging</Label>
+          <Input type="url" placeholder="https://…" {...register("links.staging")} />
+        </div>
+        <div className="space-y-2">
+          <Label>Source repository</Label>
+          <Input type="url" placeholder="https://…" {...register("links.repo")} />
+        </div>
+        <div className="space-y-2">
+          <Label>Figma / design</Label>
+          <Input type="url" placeholder="https://…" {...register("links.figma")} />
+        </div>
+        <div className="space-y-2">
+          <Label>Documentation</Label>
+          <Input type="url" placeholder="https://…" {...register("links.docs")} />
+        </div>
+        <div className="space-y-2">
+          <Label>Shared folder</Label>
+          <Input type="url" placeholder="https://…" {...register("links.sharedFolder")} />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Private project information</Label>
+        <Textarea
+          rows={5}
+          maxLength={8000}
+          placeholder="Decisions, reminders, where credentials are stored (never paste passwords), and other admin-only context…"
+          {...register("internalInfo")}
+        />
+        <p className="text-xs text-muted">Only visible in the admin panel.</p>
       </div>
 
       <div className="space-y-2">

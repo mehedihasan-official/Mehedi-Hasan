@@ -134,10 +134,12 @@ export type Brief = z.infer<typeof briefSchema>;
 
 // ---------- Project ----------
 export const projectLinksSchema = z.object({
-  live: z.string().url().optional().nullable(),
-  repo: z.string().url().optional().nullable(),
-  figma: z.string().url().optional().nullable(),
-  staging: z.string().url().optional().nullable(),
+  live: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  repo: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  figma: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  staging: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  docs: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  sharedFolder: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
 });
 export type ProjectLinks = z.infer<typeof projectLinksSchema>;
 
@@ -256,6 +258,7 @@ export type MessageCreateInput = z.infer<typeof messageCreateSchema>;
 // ---------- Order ----------
 export const orderCreateSchema = z
   .object({
+    projectName: z.string().trim().max(200).optional().nullable(),
     serviceType: z.enum(SERVICE_TYPES),
     budgetRange: z.enum(BUDGET_RANGES),
     budgetAmount: z.number().nonnegative().nullable().optional(),
@@ -286,15 +289,54 @@ export const orderCreateSchema = z
   });
 export type OrderCreateInput = z.infer<typeof orderCreateSchema>;
 
+export const manualOrderCreateSchema = orderCreateSchema
+  .innerType()
+  .extend({
+    projectName: z.string().trim().min(1).max(200),
+    clientName: z.string().trim().min(1).max(120),
+    clientEmail: z.string().trim().email().transform((email) => email.toLowerCase()),
+    clientWhatsapp: z.string().trim().max(30).transform((number) => number || null).optional().nullable(),
+    projectUrl: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+    links: projectLinksSchema.optional(),
+    internalInfo: z.string().max(8000).optional().nullable(),
+  })
+  .superRefine((value, context) => {
+    if (value.projectType === "milestone" && value.milestones.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["milestones"],
+        message: "Add at least one milestone.",
+      });
+    }
+  });
+export type ManualOrderCreateInput = z.infer<typeof manualOrderCreateSchema>;
+
 // Admin-only edits made from the order detail page.
 export const orderUpdateSchema = z.object({
+  projectName: z.string().trim().max(200).or(z.literal("")).transform((name) => name || null).optional().nullable(),
   status: z.enum(ORDER_STATUSES).optional(),
   progress: z.number().int().min(0).max(100).optional(),
   budgetAmount: z.number().nonnegative().nullable().optional(),
-  projectUrl: z.string().url().max(500).optional().nullable(),
+  projectUrl: z.string().trim().url().max(500).or(z.literal("")).transform((url) => url || null).optional().nullable(),
+  links: projectLinksSchema.optional(),
+  internalInfo: z.string().max(8000).optional().nullable(),
   notes: z.string().max(4000).optional().nullable(),
 });
 export type OrderUpdateInput = z.infer<typeof orderUpdateSchema>;
+
+export const projectActivityCreateSchema = z.object({
+  content: z.string().trim().min(1).max(4000),
+});
+export type ProjectActivityCreateInput = z.infer<typeof projectActivityCreateSchema>;
+
+export const projectActivitySchema = z.object({
+  id: z.string(),
+  kind: z.enum(["created", "updated", "note"]),
+  content: z.string(),
+  authorName: z.string(),
+  createdAt: z.string(),
+});
+export type ProjectActivity = z.infer<typeof projectActivitySchema>;
 
 // ---------- Me (self-service profile edits) ----------
 export const meUpdateSchema = z.object({
@@ -314,10 +356,13 @@ export const orderSchema = orderCreateSchema.innerType().extend({
   clientName: z.string().optional(),
   clientEmail: z.string().optional(),
   clientWhatsapp: z.string().nullable().optional(),
+  projectName: z.string().nullable().optional(),
   status: z.enum(ORDER_STATUSES),
   progress: z.number().int().min(0).max(100).default(0),
   projectUrl: z.string().url().nullable(),
   notes: z.string().nullable(),
+  links: projectLinksSchema.optional(),
+  internalInfo: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

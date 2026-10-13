@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { getSession } from '@/lib/session';
 import { apiFetchSafe } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -39,13 +41,20 @@ export default async function AdminProjectsPage({
           {data.total} client {data.total === 1 ? 'project' : 'projects'} — running and completed.
         </p>
       </div>
+      <div>
+        <Button asChild>
+          <Link href="/admin/projects/new">
+            <Plus className="h-4 w-4" /> Start project manually
+          </Link>
+        </Button>
+      </div>
 
       {error ? (
         <EmptyState tone="warning" title="Can't reach the API" description={error} />
       ) : data.orders.length === 0 ? (
         <EmptyState
           title="No projects yet"
-          description="Start an order from a brief, or a client can place one directly — it shows up here."
+          description="Create a project for a client or manage projects that clients started."
         />
       ) : (
         <>
@@ -58,9 +67,9 @@ export default async function AdminProjectsPage({
                     <CardHeader>
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <CardTitle className="font-mono">{o.orderCode}</CardTitle>
+                          <CardTitle>{o.projectName ?? o.orderCode}</CardTitle>
                           <CardDescription>
-                            {o.clientName ?? 'Unknown client'} · started {formatDate(o.createdAt)}
+                            {o.clientName ?? 'Unknown client'} · {o.orderCode} · started {formatDate(o.createdAt)}
                           </CardDescription>
                         </div>
                         <Badge tone={running ? 'warning' : 'success'}>

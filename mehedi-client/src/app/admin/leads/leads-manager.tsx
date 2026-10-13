@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Lead } from '@/shared';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
   const [editName, setEditName] = useState('');
   const [editWhatsapp, setEditWhatsapp] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { data: session } = useSession();
 
   async function addLead(event: FormEvent<HTMLFormElement>) {
@@ -75,6 +77,23 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
       toast.error(err instanceof Error ? err.message : 'Failed to update lead');
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function deleteLead(lead: Lead) {
+    if (!confirm(`Delete the lead for ${lead.email}? This can't be undone.`)) return;
+    setDeletingId(lead.id);
+    try {
+      await apiFetch(`/leads/${lead.id}`, {
+        method: 'DELETE',
+        token: session?.apiToken ?? null,
+      });
+      setLeads((current) => current.filter((item) => item.id !== lead.id));
+      toast.success('Lead deleted');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete lead');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -209,16 +228,16 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
                         <p className="mt-1 text-xs text-muted">
                           WhatsApp: {lead.whatsapp || 'Not added'}
                         </p>
+                        <p className="mt-1 text-xs text-subtle">
+                          {lead.lastLoginAt
+                            ? `Last login ${formatDate(lead.lastLoginAt)}`
+                            : `Added ${formatDate(lead.createdAt)}`}
+                        </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <Badge tone={lead.source === 'login' ? 'brand' : 'neutral'}>
                           {lead.source === 'login' ? 'Account login' : 'Manual'}
                         </Badge>
-                        <span className="text-xs text-subtle">
-                          {lead.lastLoginAt
-                            ? `Last login ${formatDate(lead.lastLoginAt)}`
-                            : `Added ${formatDate(lead.createdAt)}`}
-                        </span>
                         <Button
                           type="button"
                           size="sm"
@@ -226,6 +245,16 @@ export function LeadsManager({ initial }: { initial: Lead[] }) {
                           onClick={() => startEditing(lead)}
                         >
                           Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => deleteLead(lead)}
+                          disabled={deletingId === lead.id}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {deletingId === lead.id ? 'Deleting…' : ''}
                         </Button>
                       </div>
                     </div>

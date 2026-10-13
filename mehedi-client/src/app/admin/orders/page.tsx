@@ -58,9 +58,9 @@ export default async function AdminOrdersPage({
                   <CardHeader>
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <CardTitle className="font-mono">{o.orderCode}</CardTitle>
+                        <CardTitle>{o.projectName ?? o.orderCode}</CardTitle>
                         <CardDescription>
-                          {o.clientName ?? 'Unknown client'} · {o.clientEmail ?? '—'} · {formatDate(o.createdAt)}
+                          {o.orderCode} · {o.clientName ?? 'Unknown client'} · {o.clientEmail ?? '—'} · {formatDate(o.createdAt)}
                         </CardDescription>
                       </div>
                       <Badge tone={STATUS_TONE[o.status]}>{o.status.replace('_', ' ')}</Badge>

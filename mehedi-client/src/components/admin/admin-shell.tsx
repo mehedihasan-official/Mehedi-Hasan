@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   FolderKanban,
+  FolderPlus,
   Inbox,
   LayoutDashboard,
   MailPlus,
@@ -30,7 +31,8 @@ const nav = [
   { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/orders", label: "Orders", icon: Package },
   { href: "/admin/messages", label: "Messages", icon: MessageCircle },
-  { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+  { href: "/admin/projects", label: "Projects", icon: FolderKanban, exact: true },
+  { href: "/admin/projects/new", label: "Start project", icon: FolderPlus },
   { href: "/admin/invoices", label: "Invoices", icon: Receipt },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
