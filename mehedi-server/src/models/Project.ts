@@ -6,6 +6,8 @@ const linksSchema = new Schema(
     repo: String,
     figma: String,
     staging: String,
+    docs: String,
+    sharedFolder: String,
   },
   { _id: false },
 );

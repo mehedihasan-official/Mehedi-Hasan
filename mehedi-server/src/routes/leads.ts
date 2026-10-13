@@ -1,4 +1,5 @@
 import { Router, type Router as RouterType } from 'express';
+import { Types } from 'mongoose';
 import { LeadModel } from '../models/Lead.js';
 import { HttpError, asyncHandler } from '../lib/http.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
@@ -83,6 +84,17 @@ router.patch(
         createdAt: lead.createdAt.toISOString(),
       },
     });
+  }),
+);
+
+router.delete(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    if (!id || !Types.ObjectId.isValid(id)) throw new HttpError(404, 'Lead not found');
+    const deleted = await LeadModel.findByIdAndDelete(id);
+    if (!deleted) throw new HttpError(404, 'Lead not found');
+    res.json({ ok: true });
   }),
 );
 

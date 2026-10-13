@@ -6,6 +6,18 @@ import {
   TIMELINES,
 } from "../shared/index.js";
 
+const projectLinksSchema = new Schema(
+  {
+    live: String,
+    repo: String,
+    figma: String,
+    staging: String,
+    docs: String,
+    sharedFolder: String,
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema(
   {
     orderCode: { type: String, required: true, unique: true, index: true },
@@ -15,6 +27,7 @@ const orderSchema = new Schema(
       required: true,
       index: true,
     },
+    projectName: { type: String, trim: true, default: null },
     serviceType: { type: String, enum: SERVICE_TYPES, required: true },
     budgetRange: { type: String, enum: BUDGET_RANGES, required: true },
     budgetAmount: { type: Number, min: 0, default: null },
@@ -40,6 +53,8 @@ const orderSchema = new Schema(
     },
     progress: { type: Number, default: 0, min: 0, max: 100 },
     projectUrl: { type: String, default: null },
+    links: { type: projectLinksSchema, default: {} },
+    internalInfo: { type: String, default: null },
     notes: { type: String, default: null },
   },
   { timestamps: true },

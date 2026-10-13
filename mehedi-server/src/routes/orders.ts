@@ -1,17 +1,91 @@
 import { Router, type Router as RouterType } from "express";
 import crypto from "node:crypto";
+import { Types } from "mongoose";
 import { HttpError, asyncHandler } from "../lib/http.js";
 import { toOrder } from "../lib/mappers.js";
 import { generateOrderCode } from "../lib/orderCode.js";
 import { requireAuth } from "../middleware/auth.js";
 import { InvoiceModel } from "../models/Invoice.js";
 import { OrderModel } from "../models/Order.js";
+import { ProjectActivityModel } from "../models/ProjectActivity.js";
 import { UserModel } from "../models/User.js";
-import { orderCreateSchema, orderUpdateSchema } from "../shared/index.js";
+import {
+  manualOrderCreateSchema,
+  orderCreateSchema,
+  orderUpdateSchema,
+  projectActivityCreateSchema,
+} from "../shared/index.js";
 
 const router: RouterType = Router();
 
 router.use(requireAuth);
+
+router.post(
+  "/manual",
+  asyncHandler(async (req, res) => {
+    if (req.user!.role !== "admin") throw new HttpError(403, "Forbidden");
+    const input = manualOrderCreateSchema.parse(req.body);
+    const {
+      clientName,
+      clientEmail,
+      clientWhatsapp,
+      projectUrl,
+      links,
+      internalInfo,
+      ...orderInput
+    } = input;
+
+    let client = await UserModel.findOne({ "emails.address": clientEmail });
+    if (client?.role === "admin") {
+      throw new HttpError(409, "An administrator account cannot be used as a project client");
+    }
+    if (client) {
+      client.role = "client";
+      client.name = clientName;
+      if (clientWhatsapp) client.whatsapp = clientWhatsapp;
+      await client.save();
+    } else {
+      client = await UserModel.create({
+        role: "client",
+        name: clientName,
+        emails: [{ address: clientEmail, primary: true }],
+        whatsapp: clientWhatsapp ?? undefined,
+        source: "direct",
+        active: true,
+      });
+    }
+
+    const order = await OrderModel.create({
+      ...orderInput,
+      clientId: client._id,
+      orderCode: await generateOrderCode(),
+      status: "in_progress",
+      progress: 0,
+      projectUrl: projectUrl ?? null,
+      links: links ?? {},
+      internalInfo: internalInfo ?? null,
+    });
+    await ensureOrderInvoice(order);
+    await ProjectActivityModel.create({
+      orderId: order._id,
+      kind: "created",
+      content: "Project started manually by admin.",
+      authorName: req.user!.name,
+    });
+
+    res.status(201).json({
+      order: toOrder(
+        order as never,
+        {
+          name: client.name,
+          email: clientEmail,
+          whatsapp: client.whatsapp,
+        },
+        true,
+      ),
+    });
+  }),
+);
 
 router.post(
   "/",
@@ -24,6 +98,12 @@ router.post(
       orderCode,
     });
     await ensureOrderInvoice(order);
+    await ProjectActivityModel.create({
+      orderId: order._id,
+      kind: "created",
+      content: "Order submitted by client.",
+      authorName: req.user!.name,
+    });
 
     // Placing an order is what turns a plain registered "user" into a client.
     if (req.user!.role === "user") {
@@ -87,7 +167,7 @@ router.get(
 
     res.json({
       orders: orders.map((o) =>
-        toOrder(o as never, clientMap.get(String(o.clientId))),
+        toOrder(o as never, clientMap.get(String(o.clientId)), true),
       ),
       total,
       page,
@@ -116,7 +196,66 @@ router.get(
         }
       : null;
 
-    res.json({ order: toOrder(order as never, client) });
+    res.json({
+      order: toOrder(order as never, client, req.user!.role === "admin"),
+    });
+  }),
+);
+
+router.get(
+  "/:id/activity",
+  asyncHandler(async (req, res) => {
+    if (req.user!.role !== "admin") throw new HttpError(403, "Forbidden");
+    const orderId = req.params.id;
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+      throw new HttpError(404, "Order not found");
+    }
+    const order = await OrderModel.exists({ _id: req.params.id });
+    if (!order) throw new HttpError(404, "Order not found");
+
+    const activity = await ProjectActivityModel.find({ orderId: req.params.id })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean();
+    res.json({
+      activity: activity.map((entry) => ({
+        id: String(entry._id),
+        kind: entry.kind,
+        content: entry.content,
+        authorName: entry.authorName,
+        createdAt: entry.createdAt.toISOString(),
+      })),
+    });
+  }),
+);
+
+router.post(
+  "/:id/activity",
+  asyncHandler(async (req, res) => {
+    if (req.user!.role !== "admin") throw new HttpError(403, "Forbidden");
+    const input = projectActivityCreateSchema.parse(req.body);
+    const orderId = req.params.id;
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+      throw new HttpError(404, "Order not found");
+    }
+    const order = await OrderModel.exists({ _id: req.params.id });
+    if (!order) throw new HttpError(404, "Order not found");
+
+    const entry = await ProjectActivityModel.create({
+      orderId: req.params.id,
+      kind: "note",
+      content: input.content,
+      authorName: req.user!.name,
+    });
+    res.status(201).json({
+      entry: {
+        id: String(entry._id),
+        kind: entry.kind,
+        content: entry.content,
+        authorName: entry.authorName,
+        createdAt: entry.createdAt.toISOString(),
+      },
+    });
   }),
 );
 
@@ -131,6 +270,27 @@ router.patch(
       { new: true },
     );
     if (!updated) throw new HttpError(404, "Order not found");
+    const changed = Object.keys(input).map((key) => {
+      const labels: Record<string, string> = {
+        projectName: "project name",
+        status: "status",
+        progress: "progress",
+        budgetAmount: "budget",
+        projectUrl: "project URL",
+        links: "project links",
+        internalInfo: "internal information",
+        notes: "notes",
+      };
+      return labels[key] ?? key;
+    });
+    if (changed.length) {
+      await ProjectActivityModel.create({
+        orderId: updated._id,
+        kind: "updated",
+        content: `Updated ${changed.join(", ")}.`,
+        authorName: req.user!.name,
+      });
+    }
     let invoice = await InvoiceModel.findOne({ orderId: updated._id });
     if (
       !invoice &&
@@ -153,7 +313,7 @@ router.patch(
         },
       );
     }
-    res.json({ order: toOrder(updated as never) });
+    res.json({ order: toOrder(updated as never, null, true) });
   }),
 );
 

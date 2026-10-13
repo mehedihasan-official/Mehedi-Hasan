@@ -99,11 +99,13 @@ export function toClient(
 export function toOrder(
   order: WithId<OrderDoc>,
   client?: { name?: string; email?: string; whatsapp?: string | null } | null,
+  includeAdminDetails = false,
 ): Order {
   return {
     id: String(order._id),
     orderCode: order.orderCode,
     clientId: String(order.clientId),
+    projectName: order.projectName ?? null,
     clientName: client?.name,
     clientEmail: client?.email,
     clientWhatsapp: client?.whatsapp ?? null,
@@ -118,6 +120,19 @@ export function toOrder(
     progress: order.progress ?? 0,
     projectUrl: order.projectUrl ?? null,
     notes: order.notes ?? null,
+    ...(includeAdminDetails
+      ? {
+          links: {
+            live: order.links?.live ?? null,
+            repo: order.links?.repo ?? null,
+            figma: order.links?.figma ?? null,
+            staging: order.links?.staging ?? null,
+            docs: order.links?.docs ?? null,
+            sharedFolder: order.links?.sharedFolder ?? null,
+          },
+          internalInfo: order.internalInfo ?? null,
+        }
+      : {}),
     createdAt: order.createdAt
       ? order.createdAt.toISOString()
       : new Date().toISOString(),
