@@ -11,6 +11,7 @@ import authRouter from "./routes/auth.js";
 import briefsRouter from "./routes/briefs.js";
 import clientsRouter from "./routes/clients.js";
 import invoicesRouter from "./routes/invoices.js";
+import leadsRouter from "./routes/leads.js";
 import meRouter from "./routes/me.js";
 import messagesRouter from "./routes/messages.js";
 import ordersRouter from "./routes/orders.js";
@@ -83,6 +84,7 @@ export function createApp(): Express {
   app.use("/me", meRouter);
   app.use("/messages", messagesRouter);
   app.use("/invoices", invoicesRouter);
+  app.use("/leads", leadsRouter);
 
   app.use(notFound);
   app.use(errorHandler);

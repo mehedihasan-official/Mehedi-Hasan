@@ -5,6 +5,7 @@ import { HttpError, asyncHandler } from '../lib/http.js';
 import { verifyFirebaseToken } from '../lib/firebaseAdmin.js';
 import { signToken } from '../lib/jwt.js';
 import { toSessionUser } from '../lib/mappers.js';
+import { LeadModel } from '../models/Lead.js';
 
 const router: RouterType = Router();
 
@@ -50,6 +51,19 @@ router.post(
       user.lastActivityAt = new Date();
       await user.save();
     }
+
+    const loggedInAt = new Date();
+    await LeadModel.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          name: user.name,
+          lastLoginAt: loggedInAt,
+        },
+        $setOnInsert: { email, source: 'login' },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
     const sessionUser = toSessionUser(user as never);
     const token = signToken(sessionUser);
